@@ -45,7 +45,7 @@ if (length(cNumberFile) == 1) {
 meta {
   author: "Peter Ruzanov"
   email: "peter.ruzanov@oicr.on.ca"
-  description: "Varscan 2.2, workflow for calling SNVs and CVs"
+  description: "Varscan 2.2, workflow for calling SNVs and CVs\nCreation of mpileups and calling variants are done with parallel processing\n\n![varscan outputs](docs/Screenshot_Varscan.png)"
 
   dependencies: [
       {

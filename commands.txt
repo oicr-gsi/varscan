@@ -1,0 +1,113 @@
+## Commands
+
+This section lists command(s) run by varscan workflow
+
+* Running varscan
+
+Varscan is used to call SNV and CV events
+
+Preprocessing: bed file re-format
+
+```
+ In this embedded script we reformat bed lines into varscan-friendly intervals
+
+ import os
+ if os.path.exists("~{bedPath}"):
+    with open("~{bedPath}") as f:
+        for line in f:
+           line = line.rstrip()
+           tmp = line.split("\t")
+           r = " " + tmp[0] + ":" + tmp[1] + "-" + tmp[2]
+           print(r)
+    f.close()
+
+```
+
+Run samtools mpileup
+
+```
+ samtools mpileup -q 1 -r REGION -f REF_FASTA INPUT_NORMAL INPUT_TUMOR | awk -F "\t" '$4 > 0 && $7 > 0' | gzip -c > normtumor_sorted.pileup.gz 
+
+```
+
+Remove mitochondrial chromosome:
+
+```
+ head -n 1 ~{filePaths[0]} > "~{outputFile}.~{outputExtension}"
+ cat ~{sep=' ' filePaths} | sort -V -k 1,2 | grep -v ^chrom | grep -v ^chrM >> "~{outputFile}.~{outputExtension}"
+ cat ~{sep=' ' filePaths} | awk '{if($1 == "chrM"){print $0}}' | sort -V -k 1,2 >> "~{outputFile}.~{outputExtension}"
+ if [ ! -s ~{outputFile}.~{outputExtension} ] ; then
+  rm ~{outputFile}.~{outputExtension}
+ fi
+```
+
+Sort vcf using sequence dictionary
+
+```
+ java -Xmx[MEMORY]G -jar picard.jar SortVcf I=INPUT_VCFS SD=SEQ_DICTIONARY O=OUTPUT_FILE.SUFFIX.vcf
+
+```
+
+Indel Calling:
+
+```
+  See the full source code in .wdl, here we run this command:
+
+  zcat INPUT_PILEUP | java -Xmx[MEMORY]G -jar varscan somatic -mpileup 1 
+     --somatic-p-value P_VALUE
+
+     Optional parameters:
+
+    --min-coverage-normal MIN_COVERAGE_NORMAL
+    --min-coverage-tumor  MIN_COVERAGE_TUMOR
+    --min-var-freq MIN_VAR_FREQUENCY
+    --min-freq-for-hom MIN_FREQUENCY_FOR_HOM
+    --normal-purity NORMAL_PURITY
+    --tumor-purity TUMOR_PURIY
+    --p-value P_VALUE_HET
+    --strand-filter 1
+    --validation 1
+    --output-vcf 1
+    
+    Settings for output format:
+
+    --output-snp SAMPLE_ID.snp.vcf --output-indel SAMPLE_ID.indel.vcf
+    or:
+    --output-snp SAMPLE_ID.snp --output-indel SAMPLE_ID.indel
+
+```
+
+Find minimum coverage threshold for CV analysis:
+
+```
+
+A python code configures and runs this command: 
+
+zcat ~{inputPileup} | java -Xmx~{javaMemory}G -jar " + varscan + " copynumber --output-file ~{sampleID} -mpileup 1 --p-value ~{pValue}"
+
+Varscan reports if the coverage threshold was sufficient for the analysis. We use this coverage setting in the next step
+
+```
+
+Run copy number change analysis:
+
+```
+
+A python code configures and runs this command:
+ 
+java -Xmx[MEMORY]G -jar varscan copyCaller CV_FILE 
+                   --output-file SAMPLE_ID.copynumber.filtered
+                   --min-coverage MIN_COVERAGE # Value found in the previous step
+
+                    Optional parameters:
+
+                   --min-tumor-coverage  MIN_TUMOR_COVERAGE
+                   --max-homdel-coverage MAX_HOMDEL_COVERAGE
+                   --del-threshold   DEL_THRESHOLD
+                   --amp-threshold   AMP_THRESHOLD
+                   --min-region-size MIN_REGION_SIZE
+                   --recenter-up     RECENTER_UP
+                   --recenter-down   RECENTER_DOWN
+
+```
+
