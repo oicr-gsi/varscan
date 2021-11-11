@@ -130,7 +130,10 @@
             "varscan.smoothData.varScan": null
         },
         "description": "Varscan workflow test",
-        "engineArguments": {},
+        "engineArguments": {
+           "read_from_cache": false,
+           "write_to_cache": false
+        },
         "id": "PCSI_chr22",
         "metadata": {
             "varscan.resultCnvFile": {
@@ -176,8 +179,8 @@
         },
         "validators": [
             {
-                "metrics_calculate": "@CHECKOUT@/./calculate.sh",
-                "metrics_compare": "@CHECKOUT@/./compare.sh",
+                "metrics_calculate": "@CHECKOUT@/tests/calculate.sh",
+                "metrics_compare": "@CHECKOUT@/tests/compare.sh",
                 "output_metrics": "/.mounts/labs/gsi/testdata/varscan/output_metrics/PCSI_chr22.metrics",
                 "type": "script"
             }
@@ -314,7 +317,10 @@
             "varscan.smoothData.varScan": null
         },
         "description": "Varscan workflow test",
-        "engineArguments": {},
+        "engineArguments": {
+           "read_from_cache": false,
+           "write_to_cache": false
+        },
         "id": "PCSI_chr22_intervals",
         "metadata": {
             "varscan.resultCnvFile": {
@@ -360,8 +366,8 @@
         },
         "validators": [
             {
-                "metrics_calculate": "@CHECKOUT@/./calculate.sh",
-                "metrics_compare": "@CHECKOUT@/./compare.sh",
+                "metrics_calculate": "@CHECKOUT@/tests/calculate.sh",
+                "metrics_compare": "@CHECKOUT@/tests/compare.sh",
                 "output_metrics": "/.mounts/labs/gsi/testdata/varscan/output_metrics/PCSI_chr22_intervals.metrics",
                 "type": "script"
             }
@@ -505,7 +511,10 @@
             "varscan.smoothData.varScan": null
         },
         "description": "Varscan workflow test",
-        "engineArguments": {},
+        "engineArguments": {
+           "read_from_cache": false,
+           "write_to_cache": false
+        },
         "id": "MATS_chr22",
         "metadata": {
             "varscan.resultCnvFile": {
@@ -551,8 +560,8 @@
         },
         "validators": [
             {
-                "metrics_calculate": "@CHECKOUT@/./calculate.sh",
-                "metrics_compare": "@CHECKOUT@/./compare.sh",
+                "metrics_calculate": "@CHECKOUT@/tests/calculate.sh",
+                "metrics_compare": "@CHECKOUT@/tests/compare.sh",
                 "output_metrics": "/.mounts/labs/gsi/testdata/varscan/output_metrics/MATS_chr22.metrics",
                 "type": "script"
             }
