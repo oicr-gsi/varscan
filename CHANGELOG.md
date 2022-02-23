@@ -1,5 +1,7 @@
-## 2.2.2 - 2022-02-02
+## 2.2.3 - 2022-02-02
 - Add timeout and modules param to interval-processing task so that we can use modularized data
+## 2.2.2 - 2021-06-02
+- This version increment was to resolve installation issues in vidarr
 ## Unreleased - 2021-11-10
 [GP-2891](https://jira.oicr.on.ca/browse/GP-2891) Making RT tests more robust
 ## 2.2.1 - 2021-02-01
