@@ -101,12 +101,16 @@ output {
 task expandRegions {
 input {
  String bedPath = ""
+ String modules = "hg38-dac-exclusion/1.0"
  Int jobMemory = 4
+ Int timeout = 12
 }
 
 parameter_meta {
   bedPath: "Optional path to a bed file with intervals"
   jobMemory: "Memory for this task in GB"
+  modules: "required modules (This is to allow modularized data for bed path)" 
+  timeout: "Timeout in hours, needed to override imposed limits"
 }
 
 command <<<
@@ -125,6 +129,8 @@ command <<<
 
 runtime {
  memory:  "~{jobMemory} GB"
+ modules: "~{modules}"
+ timeout: "~{timeout}"
 }
 
 output {

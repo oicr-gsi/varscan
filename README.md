@@ -44,7 +44,9 @@ Parameter|Value|Default|Description
 #### Optional task parameters:
 Parameter|Value|Default|Description
 ---|---|---|---
+`expandRegions.modules`|String|"hg38-dac-exclusion/1.0"|required modules (This is to allow modularized data for bed path)
 `expandRegions.jobMemory`|Int|4|Memory for this task in GB
+`expandRegions.timeout`|Int|12|Timeout in hours, needed to override imposed limits
 `makePileups.refFasta`|String|"$HG19_ROOT/hg19_random.fa"|Reference fasta file, path depends on the respective module
 `makePileups.modules`|String|"samtools/0.1.19 hg19/p13"|required modules
 `makePileups.samtools`|String|"$SAMTOOLS_ROOT/bin/samtools"|path to samtools
