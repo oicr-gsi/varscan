@@ -129,10 +129,10 @@ Parameter|Value|Default|Description
 Output | Type | Description
 ---|---|---
 `resultCnvFile`|File?|file with CNV calls, smoothed
-`resultSnpFile`|File?|file with SNPs, native varscan format
-`resultIndelFile`|File?|file with Indel calls, native varscan format
-`resultSnpVcfFile`|File?|file with SNPs, vcf format
-`resultIndelVcfFile`|File?|file with Indels, vcf format
+`resultSnpFile`|File|file with SNPs, native varscan format
+`resultIndelFile`|File|file with Indel calls, native varscan format
+`resultSnpVcfFile`|File|file with SNPs, vcf format
+`resultIndelVcfFile`|File|file with Indels, vcf format
 
 
 ## Commands

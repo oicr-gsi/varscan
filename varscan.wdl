@@ -86,11 +86,11 @@ parameter_meta {
 }
 
 output {
- File? resultCnvFile      = smoothData.filteredData
- File? resultSnpFile      = mergeSNP.mergedVariants
- File? resultIndelFile    = mergeIND.mergedVariants
- File? resultSnpVcfFile   = mergeSNPvcf.mergedVcf
- File? resultIndelVcfFile = mergeINDvcf.mergedVcf
+ File? resultCnvFile     = smoothData.filteredData
+ File resultSnpFile      = mergeSNP.mergedVariants
+ File resultIndelFile    = mergeIND.mergedVariants
+ File resultSnpVcfFile   = mergeSNPvcf.mergedVcf
+ File resultIndelVcfFile = mergeINDvcf.mergedVcf
 }
 
 }
@@ -220,7 +220,7 @@ runtime {
 }
 
 output {
-  File? mergedVariants = "~{outputFile}.~{outputExtension}"
+  File mergedVariants = "~{outputFile}.~{outputExtension}"
 }
 }
 
@@ -264,7 +264,7 @@ runtime {
 }
 
 output {
-  File? mergedVcf = "~{outputFile}.~{outputSuffix}.vcf"
+  File mergedVcf = "~{outputFile}.~{outputSuffix}.vcf"
 }
 }
 
