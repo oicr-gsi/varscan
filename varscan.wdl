@@ -37,9 +37,9 @@ call mergeVariantsVcf as mergeSNPvcf { input: filePaths = select_all(getSnvVcf.s
 call mergeVariantsVcf as mergeINDvcf { input: filePaths = select_all(getSnvVcf.indelVcfFile), outputSuffix = "indel", outputFile = sampleID }
 
 # Run post-processing job if we have results from runVarscanCNV
-Array[File] cNumberFile = select_all([mergeCNV.mergedVariants])
+Array[File] cNumberFile = [mergeCNV.mergedVariants]
 if (length(cNumberFile) == 1) {
-    call smoothData{input: copyNumberFile = select_first([mergeCNV.mergedVariants]), sampleID = sampleID}
+    call smoothData{input: copyNumberFile = mergeCNV.mergedVariants, sampleID = sampleID}
 }
 
 meta {
@@ -86,11 +86,11 @@ parameter_meta {
 }
 
 output {
- File? resultCnvFile      = smoothData.filteredData
- File? resultSnpFile      = mergeSNP.mergedVariants
- File? resultIndelFile    = mergeIND.mergedVariants
- File? resultSnpVcfFile   = mergeSNPvcf.mergedVcf
- File? resultIndelVcfFile = mergeINDvcf.mergedVcf
+ File? resultCnvFile     = smoothData.filteredData
+ File resultSnpFile      = mergeSNP.mergedVariants
+ File resultIndelFile    = mergeIND.mergedVariants
+ File resultSnpVcfFile   = mergeSNPvcf.mergedVcf
+ File resultIndelVcfFile = mergeINDvcf.mergedVcf
 }
 
 }
@@ -220,7 +220,7 @@ runtime {
 }
 
 output {
-  File? mergedVariants = "~{outputFile}.~{outputExtension}"
+  File mergedVariants = "~{outputFile}.~{outputExtension}"
 }
 }
 
@@ -264,7 +264,7 @@ runtime {
 }
 
 output {
-  File? mergedVcf = "~{outputFile}.~{outputSuffix}.vcf"
+  File mergedVcf = "~{outputFile}.~{outputSuffix}.vcf"
 }
 }
 

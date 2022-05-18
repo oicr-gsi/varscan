@@ -1,3 +1,5 @@
+## 2.2.4 - 2022-05-25
+- Change most output types to non-optional. Classified as a bug fix. Filtered outputs are still optional!
 ## 2.2.3 - 2022-02-02
 - Add timeout and modules param to interval-processing task so that we can use modularized data
 ## 2.2.2 - 2021-06-02
