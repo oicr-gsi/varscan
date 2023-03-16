@@ -1,9 +1,6 @@
 # varscan
 
 Varscan 2.2, workflow for calling SNVs and CVs
-
-## Overview
-
 Creation of mpileups and calling variants are done with parallel processing
 ![varscan outputs](docs/Screenshot_Varscan.png)
 
@@ -37,7 +34,7 @@ Parameter|Value|Description
 Parameter|Value|Default|Description
 ---|---|---|---
 `outputFileNamePrefix`|String|""|Output file(s) prefix
-`bedIntervalsPath`|String|""|Path to a .bed file used for targeted variant calling
+`bedIntervalsPath`|String|""|Path to a .bed file used for splitting pileup job/limiting analysis to selected regions
 `chromRegions`|Array[String]|["chr1:1-249250621", "chr2:1-243199373", "chr3:1-198022430", "chr4:1-191154276", "chr5:1-180915260", "chr6:1-171115067", "chr7:1-159138663", "chr8:1-146364022", "chr9:1-141213431", "chr10:1-135534747", "chr11:1-135006516", "chr12:1-133851895", "chr13:1-115169878", "chr14:1-107349540", "chr15:1-102531392", "chr16:1-90354753", "chr17:1-81195210", "chr18:1-78077248", "chr19:1-59128983", "chr20:1-63025520", "chr21:1-48129895", "chr22:1-51304566", "chrX:1-155270560", "chrY:1-59373566", "chrM:1-16571"]|Regions used for scattering tasks, need to be assembly-specific
 
 
@@ -139,11 +136,14 @@ Output | Type | Description
  
  This section lists command(s) run by varscan workflow
  
- * Running varscan
+ ### Running varscan
  
  Varscan is used to call SNV and CV events
  
- Preprocessing: bed file re-format
+  * Preprocessing
+ 
+ bed file re-format to be used with scattered pileup creation. Note that it should be a resonable ( <100 perhaps? ) intervals
+ so that we do not end up with a million jobs running. Use wisely, as it may result in grabbing a lot of compute nodes.
  
  ```
   In this embedded script we reformat bed lines into varscan-friendly intervals
@@ -160,14 +160,14 @@ Output | Type | Description
  
  ```
  
- Run samtools mpileup
+  * Run samtools mpileup
  
  ```
   samtools mpileup -q 1 -r REGION -f REF_FASTA INPUT_NORMAL INPUT_TUMOR | awk -F "\t" '$4 > 0 && $7 > 0' | gzip -c > normtumor_sorted.pileup.gz 
  
  ```
  
- Remove mitochondrial chromosome:
+  * Remove mitochondrial chromosome:
  
  ```
   head -n 1 ~{filePaths[0]} > "~{outputFile}.~{outputExtension}"
@@ -178,14 +178,14 @@ Output | Type | Description
   fi
  ```
  
- Sort vcf using sequence dictionary
+  * Sort vcf using sequence dictionary
  
  ```
   java -Xmx[MEMORY]G -jar picard.jar SortVcf I=INPUT_VCFS SD=SEQ_DICTIONARY O=OUTPUT_FILE.SUFFIX.vcf
  
  ```
  
- Indel Calling:
+  * SNP/Indel Calling:
  
  ```
    See the full source code in .wdl, here we run this command:
@@ -209,12 +209,14 @@ Output | Type | Description
      Settings for output format:
  
      --output-snp SAMPLE_ID.snp.vcf --output-indel SAMPLE_ID.indel.vcf
+   
      or:
+ 
      --output-snp SAMPLE_ID.snp --output-indel SAMPLE_ID.indel
  
  ```
  
- Find minimum coverage threshold for CV analysis:
+  * Find minimum coverage threshold for CV analysis:
  
  ```
  
@@ -226,7 +228,7 @@ Output | Type | Description
  
  ```
  
- Run copy number change analysis:
+ ### Run copy number change analysis:
  
  ```
  

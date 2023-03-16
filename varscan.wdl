@@ -81,7 +81,7 @@ parameter_meta {
   inputTumorIndex: "input .bai file for tumor sample"
   inputNormalIndex: "input .bai file for normal sample"
   outputFileNamePrefix: "Output file(s) prefix"
-  bedIntervalsPath: "Path to a .bed file used for targeted variant calling"
+  bedIntervalsPath: "Path to a .bed file used for splitting pileup job/limiting analysis to selected regions"
   chromRegions: "Regions used for scattering tasks, need to be assembly-specific"
 }
 
@@ -107,7 +107,7 @@ input {
 }
 
 parameter_meta {
-  bedPath: "Optional path to a bed file with intervals"
+  bedPath: "Optional path to a bed file with intervals for splitting pileup job/limiting to regions"
   jobMemory: "Memory for this task in GB"
   modules: "required modules (This is to allow modularized data for bed path)" 
   timeout: "Timeout in hours, needed to override imposed limits"
