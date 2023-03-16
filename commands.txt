@@ -2,11 +2,14 @@
 
 This section lists command(s) run by varscan workflow
 
-* Running varscan
+### Running varscan
 
 Varscan is used to call SNV and CV events
 
-Preprocessing: bed file re-format
+ * Preprocessing
+
+bed file re-format to be used with scattered pileup creation. Note that it should be a resonable ( <100 perhaps? ) intervals
+so that we do not end up with a million jobs running. Use wisely, as it may result in grabbing a lot of compute nodes.
 
 ```
  In this embedded script we reformat bed lines into varscan-friendly intervals
@@ -23,14 +26,14 @@ Preprocessing: bed file re-format
 
 ```
 
-Run samtools mpileup
+ * Run samtools mpileup
 
 ```
  samtools mpileup -q 1 -r REGION -f REF_FASTA INPUT_NORMAL INPUT_TUMOR | awk -F "\t" '$4 > 0 && $7 > 0' | gzip -c > normtumor_sorted.pileup.gz 
 
 ```
 
-Remove mitochondrial chromosome:
+ * Remove mitochondrial chromosome:
 
 ```
  head -n 1 ~{filePaths[0]} > "~{outputFile}.~{outputExtension}"
@@ -41,14 +44,14 @@ Remove mitochondrial chromosome:
  fi
 ```
 
-Sort vcf using sequence dictionary
+ * Sort vcf using sequence dictionary
 
 ```
  java -Xmx[MEMORY]G -jar picard.jar SortVcf I=INPUT_VCFS SD=SEQ_DICTIONARY O=OUTPUT_FILE.SUFFIX.vcf
 
 ```
 
-Indel Calling:
+ * SNP/Indel Calling:
 
 ```
   See the full source code in .wdl, here we run this command:
@@ -72,12 +75,14 @@ Indel Calling:
     Settings for output format:
 
     --output-snp SAMPLE_ID.snp.vcf --output-indel SAMPLE_ID.indel.vcf
+  
     or:
+
     --output-snp SAMPLE_ID.snp --output-indel SAMPLE_ID.indel
 
 ```
 
-Find minimum coverage threshold for CV analysis:
+ * Find minimum coverage threshold for CV analysis:
 
 ```
 
@@ -89,7 +94,7 @@ Varscan reports if the coverage threshold was sufficient for the analysis. We us
 
 ```
 
-Run copy number change analysis:
+### Run copy number change analysis:
 
 ```
 
