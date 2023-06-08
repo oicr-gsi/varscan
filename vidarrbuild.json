@@ -1,7 +1,8 @@
 {
     "names": [
         "varscan",
-        "varscan_by_tumor_group"
+        "varscan_by_tumor_group",
+        "varscan_matched"
     ],
     "wdl": "varscan.wdl"
 }
