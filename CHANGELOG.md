@@ -1,3 +1,5 @@
+## 2.2.5 - 2023-06-08
+- Increment version to install varscan_matched in Vidarr
 ## Unreleased
 - updated README, explained passing interval file better
 ## 2.2.4 - 2022-05-25
