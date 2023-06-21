@@ -28,6 +28,7 @@ Parameter|Value|Description
 `inputNormal`|File|input .bam file for normal sample
 `inputTumorIndex`|File|input .bai file for tumor sample
 `inputNormalIndex`|File|input .bai file for normal sample
+`reference`|String|Reference id for the assembly
 
 
 #### Optional workflow parameters:
@@ -35,7 +36,7 @@ Parameter|Value|Default|Description
 ---|---|---|---
 `outputFileNamePrefix`|String|""|Output file(s) prefix
 `bedIntervalsPath`|String|""|Path to a .bed file used for splitting pileup job/limiting analysis to selected regions
-`chromRegions`|Array[String]|["chr1:1-249250621", "chr2:1-243199373", "chr3:1-198022430", "chr4:1-191154276", "chr5:1-180915260", "chr6:1-171115067", "chr7:1-159138663", "chr8:1-146364022", "chr9:1-141213431", "chr10:1-135534747", "chr11:1-135006516", "chr12:1-133851895", "chr13:1-115169878", "chr14:1-107349540", "chr15:1-102531392", "chr16:1-90354753", "chr17:1-81195210", "chr18:1-78077248", "chr19:1-59128983", "chr20:1-63025520", "chr21:1-48129895", "chr22:1-51304566", "chrX:1-155270560", "chrY:1-59373566", "chrM:1-16571"]|Regions used for scattering tasks, need to be assembly-specific
+`chromRegions`|Array[String]|""|Regions used for scattering tasks, need to be assembly-specific
 
 
 #### Optional task parameters:
@@ -44,8 +45,8 @@ Parameter|Value|Default|Description
 `expandRegions.modules`|String|"hg38-dac-exclusion/1.0"|required modules (This is to allow modularized data for bed path)
 `expandRegions.jobMemory`|Int|4|Memory for this task in GB
 `expandRegions.timeout`|Int|12|Timeout in hours, needed to override imposed limits
-`makePileups.refFasta`|String|"$HG19_ROOT/hg19_random.fa"|Reference fasta file, path depends on the respective module
-`makePileups.modules`|String|"samtools/0.1.19 hg19/p13"|required modules
+`makePileups.refFasta`|String||Reference fasta file, path depends on the respective module
+`makePileups.modules`|String|""|required modules
 `makePileups.samtools`|String|"$SAMTOOLS_ROOT/bin/samtools"|path to samtools
 `makePileups.jobMemory`|Int|18|memory for this job, in Gb
 `makePileups.timeout`|Int|40|Timeout in hours, needed to override imposed limits
@@ -97,13 +98,13 @@ Parameter|Value|Default|Description
 `mergeSNP.timeout`|Int|10|Timeout in hours, needed to override imposed limits
 `mergeIND.jobMemory`|Int|6|memory in GB for this job
 `mergeIND.timeout`|Int|10|Timeout in hours, needed to override imposed limits
-`mergeSNPvcf.modules`|String|"picard/2.21.2 hg19/p13"|modules needed for this task
-`mergeSNPvcf.seqDictionary`|String|"$HG19_ROOT/hg19_random.dict"|.dict file for the reference in use
+`mergeSNPvcf.modules`|String|""|modules needed for this task
+`mergeSNPvcf.seqDictionary`|String|""|.dict file for the reference in use
 `mergeSNPvcf.jobMemory`|Int|12|memory in GB for this job
 `mergeSNPvcf.javaMemory`|Int|8|memory in GB for java VM
 `mergeSNPvcf.timeout`|Int|10|Timeout in hours, needed to override imposed limits
-`mergeINDvcf.modules`|String|"picard/2.21.2 hg19/p13"|modules needed for this task
-`mergeINDvcf.seqDictionary`|String|"$HG19_ROOT/hg19_random.dict"|.dict file for the reference in use
+`mergeINDvcf.modules`|String|""|modules needed for this task
+`mergeINDvcf.seqDictionary`|String|""|.dict file for the reference in use
 `mergeINDvcf.jobMemory`|Int|12|memory in GB for this job
 `mergeINDvcf.javaMemory`|Int|8|memory in GB for java VM
 `mergeINDvcf.timeout`|Int|10|Timeout in hours, needed to override imposed limits

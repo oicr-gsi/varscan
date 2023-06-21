@@ -3,6 +3,7 @@
         "arguments": {
             "varscan.bedIntervalsPath": null,
             "varscan.chromRegions": null,
+            "varscan.reference": "hg19",
             "varscan.expandRegions.jobMemory": null,
             "varscan.expandRegions.timeout": null,
             "varscan.expandRegions.modules": null,
@@ -192,6 +193,7 @@
         "arguments": {
             "varscan.bedIntervalsPath": "/.mounts/labs/gsi/testdata/varscan/chr22_test_intervals.bed",
             "varscan.chromRegions": null,
+            "varscan.reference": "hg19",
             "varscan.expandRegions.jobMemory": null,
             "varscan.expandRegions.timeout": null,
             "varscan.expandRegions.modules": null,
@@ -388,6 +390,7 @@
                 "chr22:40000001-50000000",
                 "chr22:50000001-50818468"
             ],
+            "varscan.reference": "hg19",
             "varscan.expandRegions.jobMemory": null,
             "varscan.expandRegions.timeout": null,
             "varscan.expandRegions.modules": null,
