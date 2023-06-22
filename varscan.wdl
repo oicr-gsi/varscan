@@ -1,7 +1,6 @@
 version 1.0
 
 struct GenomeResources {
-    Array[String] referenceRegions
     String workflowModules
     String refFasta
     String mergingModules
@@ -20,27 +19,30 @@ input {
     String bedIntervalsPath = ""
 }
 
+Map[String, Array[String]] regions = {
+  "hg19": ["chr1:1-249250621","chr2:1-243199373","chr3:1-198022430","chr4:1-191154276","chr5:1-180915260","chr6:1-171115067","chr7:1-159138663","chr8:1-146364022","chr9:1-141213431","chr10:1-135534747","chr11:1-135006516","chr12:1-133851895","chr13:1-115169878","chr14:1-107349540","chr15:1-102531392","chr16:1-90354753","chr17:1-81195210","chr18:1-78077248","chr19:1-59128983","chr20:1-63025520","chr21:1-48129895","chr22:1-51304566","chrX:1-155270560","chrY:1-59373566","chrM:1-16571"],
+  "hg38": ["chr1:1-248956422","chr2:1-242193529","chr3:1-198295559","chr4:1-190214555","chr5:1-181538259","chr6:1-170805979","chr7:1-159345973","chr8:1-145138636","chr9:1-138394717","chr10:1-133797422","chr11:1-135086622","chr12:1-133275309","chr13:1-114364328","chr14:1-107043718","chr15:1-101991189","chr16:1-90338345","chr17:1-83257441","chr18:1-80373285","chr19:1-58617616","chr20:1-64444167","chr21:1-46709983","chr22:1-50818468","chrX:1-156040895","chrY:1-57227415","chrM:1-16569"],
+  "mm10": ["chr1:1-195471971","chr2:1-182113224","chr3:1-160039680","chr4:1-156508116","chr5:1-151834684","chr6:1-149736546","chr7:1-145441459","chr8:1-129401213","chr9:1-124595110","chr10:1-130694993","chr11:1-122082543","chr12:1-120129022","chr13:1-120421639","chr14:1-124902244","chr15:1-104043685","chr16:1-98207768","chr17:1-94987271","chr18:1-90702639","chr19:1-61431566","chrX:1-171031299","chrY:1-91744698","chrM:1-16299"]
+}
+
 Map[String,GenomeResources] resources = {
   "hg19":  {
     "workflowModules": "samtools/0.1.19 hg19/p13",
     "refFasta": "$HG19_ROOT/hg19_random.fa",
     "mergingModules": "picard/2.21.2 hg19/p13",
-    "refDict": "$HG19_ROOT/hg19_random.dict",
-    "referenceRegions": ["chr1:1-249250621","chr2:1-243199373","chr3:1-198022430","chr4:1-191154276","chr5:1-180915260","chr6:1-171115067","chr7:1-159138663","chr8:1-146364022","chr9:1-141213431","chr10:1-135534747","chr11:1-135006516","chr12:1-133851895","chr13:1-115169878","chr14:1-107349540","chr15:1-102531392","chr16:1-90354753","chr17:1-81195210","chr18:1-78077248","chr19:1-59128983","chr20:1-63025520","chr21:1-48129895","chr22:1-51304566","chrX:1-155270560","chrY:1-59373566","chrM:1-16571"]
+    "refDict": "$HG19_ROOT/hg19_random.dict"
   },
   "hg38": {
     "workflowModules": "samtools/0.1.19 hg38/p12",
     "refFasta": "$HG38_ROOT/hg38_random.fa",
     "mergingModules": "picard/2.21.2 hg38/p12",
-    "refDict": "$HG38_ROOT/hg38_random.dict",
-    "referenceRegions": ["chr1:1-248956422","chr2:1-242193529","chr3:1-198295559","chr4:1-190214555","chr5:1-181538259","chr6:1-170805979","chr7:1-159345973","chr8:1-145138636","chr9:1-138394717","chr10:1-133797422","chr11:1-135086622","chr12:1-133275309","chr13:1-114364328","chr14:1-107043718","chr15:1-101991189","chr16:1-90338345","chr17:1-83257441","chr18:1-80373285","chr19:1-58617616","chr20:1-64444167","chr21:1-46709983","chr22:1-50818468","chrX:1-156040895","chrY:1-57227415","chrM:1-16569"]
+    "refDict": "$HG38_ROOT/hg38_random.dict"
   },
   "mm10": {
     "workflowModules": "samtools/0.1.19 mm10/p6",
     "refFasta": "$MM10_ROOT/mm10.fa",
     "mergingModules": "picard/2.21.2 mm10/p6",
-    "refDict": "$MM10_ROOT/mm10.dict",
-    "referenceRegions": ["chr1:1-195471971","chr2:1-182113224","chr3:1-160039680","chr4:1-156508116","chr5:1-151834684","chr6:1-149736546","chr7:1-145441459","chr8:1-129401213","chr9:1-124595110","chr10:1-130694993","chr11:1-122082543","chr12:1-120129022","chr13:1-120421639","chr14:1-124902244","chr15:1-104043685","chr16:1-98207768","chr17:1-94987271","chr18:1-90702639","chr19:1-61431566","chrX:1-171031299","chrY:1-91744698","chrM:1-16299"]
+    "refDict": "$MM10_ROOT/mm10.dict"
   } 
 }
 
@@ -48,7 +50,7 @@ Map[String,GenomeResources] resources = {
 call expandRegions { input: bedPath = bedIntervalsPath }
 
 String sampleID = if outputFileNamePrefix=="" then basename(inputTumor, ".bam") else outputFileNamePrefix
-Array[String] splitRegions = if bedIntervalsPath != "" then expandRegions.regions else resources[reference].referenceRegions
+Array[String] splitRegions = if bedIntervalsPath != "" then expandRegions.regions else regions[reference]
 
 # Produce pileups
 scatter ( r in splitRegions )   {
