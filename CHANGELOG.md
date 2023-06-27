@@ -1,3 +1,5 @@
+## 2.3.0 - 2023-06-21
+- Assembly-specific settings go into wdl
 ## 2.2.5 - 2023-06-08
 - Increment version to install varscan_matched in Vidarr
 ## Unreleased

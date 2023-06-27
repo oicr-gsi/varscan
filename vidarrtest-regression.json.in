@@ -3,6 +3,7 @@
         "arguments": {
             "varscan.bedIntervalsPath": null,
             "varscan.chromRegions": null,
+            "varscan.reference": "hg19",
             "varscan.expandRegions.jobMemory": null,
             "varscan.expandRegions.timeout": null,
             "varscan.expandRegions.modules": null,
@@ -110,7 +111,7 @@
             "varscan.mergeSNPvcf.modules": null,
             "varscan.mergeSNPvcf.seqDictionary": null,
             "varscan.mergeSNPvcf.timeout": null,
-            "varscan.outputFileNamePrefix": "VARTEST",
+            "varscan.outputFileNamePrefix": "PCSI0090_chr22",
             "varscan.runVarscanCNV.javaMemory": null,
             "varscan.runVarscanCNV.jobMemory": null,
             "varscan.runVarscanCNV.logFile": null,
@@ -192,6 +193,7 @@
         "arguments": {
             "varscan.bedIntervalsPath": "/.mounts/labs/gsi/testdata/varscan/chr22_test_intervals.bed",
             "varscan.chromRegions": null,
+            "varscan.reference": "hg19",
             "varscan.expandRegions.jobMemory": null,
             "varscan.expandRegions.timeout": null,
             "varscan.expandRegions.modules": null,
@@ -299,7 +301,7 @@
             "varscan.mergeSNPvcf.modules": null,
             "varscan.mergeSNPvcf.seqDictionary": null,
             "varscan.mergeSNPvcf.timeout": null,
-            "varscan.outputFileNamePrefix": "VARTEST",
+            "varscan.outputFileNamePrefix": "PCSI0090_chr22_intervals",
             "varscan.runVarscanCNV.javaMemory": null,
             "varscan.runVarscanCNV.jobMemory": null,
             "varscan.runVarscanCNV.logFile": null,
@@ -388,6 +390,7 @@
                 "chr22:40000001-50000000",
                 "chr22:50000001-50818468"
             ],
+            "varscan.reference": "hg19",
             "varscan.expandRegions.jobMemory": null,
             "varscan.expandRegions.timeout": null,
             "varscan.expandRegions.modules": null,
