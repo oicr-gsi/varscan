@@ -5,6 +5,7 @@ struct GenomeResources {
     String refFasta
     String mergingModules
     String refDict
+    Int largest
 }
 
 workflow varscan {
@@ -30,19 +31,22 @@ Map[String,GenomeResources] resources = {
     "workflowModules": "samtools/0.1.19 hg19/p13",
     "refFasta": "$HG19_ROOT/hg19_random.fa",
     "mergingModules": "picard/2.21.2 hg19/p13",
-    "refDict": "$HG19_ROOT/hg19_random.dict"
+    "refDict": "$HG19_ROOT/hg19_random.dict",
+    "largest": "249250621"
   },
   "hg38": {
     "workflowModules": "samtools/0.1.19 hg38/p12",
     "refFasta": "$HG38_ROOT/hg38_random.fa",
     "mergingModules": "picard/2.21.2 hg38/p12",
-    "refDict": "$HG38_ROOT/hg38_random.dict"
+    "refDict": "$HG38_ROOT/hg38_random.dict",
+    "largest": "248956422"
   },
   "mm10": {
     "workflowModules": "samtools/0.1.19 mm10/p6",
     "refFasta": "$MM10_ROOT/mm10.fa",
     "mergingModules": "picard/2.21.2 mm10/p6",
-    "refDict": "$MM10_ROOT/mm10.dict"
+    "refDict": "$MM10_ROOT/mm10.dict",
+    "largest": "195471971"
   } 
 }
 
@@ -54,20 +58,26 @@ Array[String] splitRegions = if bedIntervalsPath != "" then expandRegions.region
 
 # Produce pileups
 scatter ( r in splitRegions )   {
+  call getChrCoefficient {
+      input: modules = resources [ reference ].workflowModules,
+             refDict = resources [ reference ].refDict,
+             largestChrom = resources [ reference ].largest,
+             region = r
+  }
+
   call makePileups { input: inputTumor = inputTumor,
                             inputTumorIndex = inputTumorIndex,
                             inputNormal = inputNormal,
                             inputNormalIndex = inputNormalIndex,
                             modules = resources[reference].workflowModules,
                             refFasta = resources[reference].refFasta,
+                            scaleCoefficient = getChrCoefficient.coeff,
                             region = r }
-}
 
-# Configure and run Varscan
-scatter( p in makePileups.pileup) {
-  call runVarscanCNV { input: inputPileup = p, sampleID = sampleID }
-  call runVarscanSNV as getSnvNative { input: inputPileup = p, sampleID = sampleID }
-  call runVarscanSNV as getSnvVcf { input: inputPileup = p, sampleID = sampleID, outputVcf = 1 }
+  # Configure and run Varscan
+  call runVarscanCNV { input: inputPileup = makePileups.pileup, sampleID = sampleID }
+  call runVarscanSNV as getSnvNative { input: inputPileup = makePileups.pileup, sampleID = sampleID }
+  call runVarscanSNV as getSnvVcf { input: inputPileup = makePileups.pileup, sampleID = sampleID, outputVcf = 1 }
 }
 
 # Merge tasks
@@ -145,6 +155,51 @@ output {
 
 }
 
+
+# ================================================================
+#  Scaling coefficient - use to scale RAM allocation by chromosome
+# ================================================================
+task getChrCoefficient {
+  input {
+    Int memory = 1
+    Int timeout = 1
+    Int largestChrom
+    String region
+    String modules
+    String refDict
+  }
+
+  parameter_meta {
+    refDict: ".dict file for the reference genome, we use it to extract chromosome ids"
+    timeout: "Hours before task timeout"
+    region: "Region to extract a chromosome to check"
+    memory: "Memory allocated for this job"
+    modules: "Names and versions of modules to load"
+    largestChrom: "Length of the largest chromosome in a genome"
+  }
+
+  command <<<
+    CHROM=$(echo ~{region} | sed 's/:.*//')
+    grep -w SN:$CHROM ~{refDict} | cut -f 3 | sed 's/.*://' | awk '{print int(($1/~{largestChrom} + 0.1) * 10)/10}'
+  >>>
+
+  runtime {
+    memory:  "~{memory} GB"
+    modules: "~{modules}"
+    timeout: "~{timeout}"
+  }
+
+  output {
+    String coeff = read_string(stdout())
+  }
+
+  meta {
+    output_meta: {
+      coeff: "Length ratio as relative to the largest chromosome."
+    }
+  }
+}
+
 # =======================================================
 # Read bed file, return a string with regions for mpileup
 # =======================================================
@@ -201,6 +256,7 @@ input {
  String modules
  String samtools = "$SAMTOOLS_ROOT/bin/samtools"
  String region 
+ Float scaleCoefficient
  Int jobMemory   = 18
  Int timeout     = 40
 }
@@ -214,6 +270,7 @@ parameter_meta {
   modules: "required modules"
   samtools: "path to samtools"
   region: "Region in a form of chrX:12000-12500 for mpileup command"
+  scaleCoefficient: "Scaling coefficient for RAM allocation, depends on chromosome size"
   jobMemory: "memory for this job, in Gb"
   timeout: "Timeout in hours, needed to override imposed limits"
 }
@@ -224,7 +281,7 @@ command <<<
 >>>
 
 runtime {
- memory: "~{jobMemory} GB"
+ memory: "~{round(jobMemory * scaleCoefficient)} GB"
  modules: "~{modules}"
  timeout: "~{timeout}"
 }
@@ -336,6 +393,7 @@ input {
   Float normalPurity = 1.0
   Float tumorPurity = 1.0
   Float pValueHet = 0.99
+  Float scaleCoefficient
   Int strandFilter = 0
   Int validation = 0
   Int outputVcf = 0
@@ -359,6 +417,7 @@ parameter_meta {
  pValueHet: "p-value threshold to call a heterozygote [0.99]"
  strandFilter: "If set to 1, removes variants with >90% strand bias"
  validation: "If set to 1, outputs all compared positions even if non-variant"
+ scaleCoefficient: "Scaling coefficient for RAM allocation, depends on chromosome size"
  jobMemory: "Memory in Gb for this job"
  javaMemory: "Memory in Gb for Java"
  logFile: "File for logging Varscan messages"
@@ -431,7 +490,7 @@ command <<<
 >>>
 
 runtime {
-  memory:  "~{jobMemory} GB"
+  memory: "~{round(jobMemory * scaleCoefficient)} GB"
   modules: "~{modules}"
   timeout: "~{timeout}"
 }
@@ -452,6 +511,7 @@ input {
   File inputPileup
   String sampleID ="VARSCAN"
   Float pValue = 0.05
+  Float scaleCoefficient
   Int jobMemory  = 20
   Int javaMemory = 6
   String logFile = "VARSCAN_CNV.log"
@@ -467,6 +527,7 @@ parameter_meta {
  jobMemory: "Memory in Gb for this job"
  javaMemory: "Memory in Gb for Java"
  logFile: "File for logging Varscan messages"
+ scaleCoefficient: "Scaling coefficient for RAM allocation, depends on chromosome size"
  varScan: "path to varscan .jar file"
  modules: "Names and versions of modules"
  timeout: "Timeout in hours, needed to override imposed limits"
@@ -511,7 +572,7 @@ command <<<
 >>>
 
 runtime {
-  memory:  "~{jobMemory} GB"
+  memory: "~{round(jobMemory * scaleCoefficient)} GB"
   modules: "~{modules}"
   timeout: "~{timeout}"
 }

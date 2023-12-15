@@ -1,3 +1,5 @@
+## 2.4.0 - 2023-12-16
+- Added scaling RAM assignment by chromosome for scattered tasks
 ## 2.3.0 - 2023-06-21
 - Assembly-specific settings go into wdl
 ## 2.2.5 - 2023-06-08
