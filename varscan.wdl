@@ -75,9 +75,9 @@ scatter ( r in splitRegions )   {
                             region = r }
 
   # Configure and run Varscan
-  call runVarscanCNV { input: inputPileup = makePileups.pileup, sampleID = sampleID }
-  call runVarscanSNV as getSnvNative { input: inputPileup = makePileups.pileup, sampleID = sampleID }
-  call runVarscanSNV as getSnvVcf { input: inputPileup = makePileups.pileup, sampleID = sampleID, outputVcf = 1 }
+  call runVarscanCNV { input: inputPileup = makePileups.pileup, sampleID = sampleID, scaleCoefficient = getChrCoefficient.coeff }
+  call runVarscanSNV as getSnvNative { input: inputPileup = makePileups.pileup, sampleID = sampleID, scaleCoefficient = getChrCoefficient.coeff }
+  call runVarscanSNV as getSnvVcf { input: inputPileup = makePileups.pileup, sampleID = sampleID, outputVcf = 1, scaleCoefficient = getChrCoefficient.coeff }
 }
 
 # Merge tasks
@@ -256,7 +256,7 @@ input {
  String modules
  String samtools = "$SAMTOOLS_ROOT/bin/samtools"
  String region 
- Float scaleCoefficient
+ Float scaleCoefficient = 1.0
  Int jobMemory   = 18
  Int timeout     = 40
 }
@@ -393,7 +393,7 @@ input {
   Float normalPurity = 1.0
   Float tumorPurity = 1.0
   Float pValueHet = 0.99
-  Float scaleCoefficient
+  Float scaleCoefficient = 1.0
   Int strandFilter = 0
   Int validation = 0
   Int outputVcf = 0
@@ -511,7 +511,7 @@ input {
   File inputPileup
   String sampleID ="VARSCAN"
   Float pValue = 0.05
-  Float scaleCoefficient
+  Float scaleCoefficient = 1.0
   Int jobMemory  = 20
   Int javaMemory = 6
   String logFile = "VARSCAN_CNV.log"
