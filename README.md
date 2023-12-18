@@ -1,6 +1,6 @@
 # varscan
 
-Varscan 2.2, workflow for calling SNVs and CVs
+Varscan 2.3, workflow for calling SNVs and CVs
 Creation of mpileups and calling variants are done with parallel processing
 ![varscan outputs](docs/Screenshot_Varscan.png)
 
@@ -30,6 +30,9 @@ Parameter|Value|Description
 `inputNormalIndex`|File|input .bai file for normal sample
 `reference`|String|Reference assembly id, hg19 hg38 or mm10
 `outputFileNamePrefix`|String|Output file(s) prefix
+`runVarscanCNV.scaleCoefficient`|Float|Scaling coefficient for RAM allocation, depends on chromosome size
+`getSnvNative.scaleCoefficient`|Float|Scaling coefficient for RAM allocation, depends on chromosome size
+`getSnvVcf.scaleCoefficient`|Float|Scaling coefficient for RAM allocation, depends on chromosome size
 
 
 #### Optional workflow parameters:
@@ -44,6 +47,8 @@ Parameter|Value|Default|Description
 `expandRegions.modules`|String|"hg38-dac-exclusion/1.0"|required modules (This is to allow modularized data for bed path)
 `expandRegions.jobMemory`|Int|4|Memory for this task in GB
 `expandRegions.timeout`|Int|12|Timeout in hours, needed to override imposed limits
+`getChrCoefficient.memory`|Int|1|Memory allocated for this job
+`getChrCoefficient.timeout`|Int|1|Hours before task timeout
 `makePileups.samtools`|String|"$SAMTOOLS_ROOT/bin/samtools"|path to samtools
 `makePileups.jobMemory`|Int|18|memory for this job, in Gb
 `makePileups.timeout`|Int|40|Timeout in hours, needed to override imposed limits
@@ -128,18 +133,22 @@ Output | Type | Description
 
 ## Commands
  
- This section lists command(s) run by varscan workflow
+This section lists command(s) run by varscan workflow
  
- ### Running varscan
+### Produce a scaling coefficient for allocating RAM
  
- Varscan is used to call SNV and CV events
+```
+   CHROM=$(echo ~{region} | sed 's/:.*//')
+   grep -w SN:$CHROM ~{refDict} | cut -f 3 | sed 's/.*://' | awk '{print int(($1/~{largestChrom} + 0.1) * 10)/10}'
+   
+```
  
-  * Preprocessing
+### Preprocessing
  
- bed file re-format to be used with scattered pileup creation. Note that it should be a resonable ( <100 perhaps? ) intervals
- so that we do not end up with a million jobs running. Use wisely, as it may result in grabbing a lot of compute nodes.
+bed file re-format to be used with scattered pileup creation. Note that it should be a resonable ( <100 perhaps? ) intervals
+so that we do not end up with a million jobs running. Use wisely, as it may result in grabbing a lot of compute nodes.
  
- ```
+```
   In this embedded script we reformat bed lines into varscan-friendly intervals
  
   import os
@@ -152,36 +161,36 @@ Output | Type | Description
             print(r)
      f.close()
  
- ```
+```
  
-  * Run samtools mpileup
+### Run samtools mpileup
  
- ```
+```
   samtools mpileup -q 1 -r REGION -f REF_FASTA INPUT_NORMAL INPUT_TUMOR | awk -F "\t" '$4 > 0 && $7 > 0' | gzip -c > normtumor_sorted.pileup.gz 
  
- ```
+```
  
-  * Remove mitochondrial chromosome:
+### Remove mitochondrial chromosome:
  
- ```
+```
   head -n 1 ~{filePaths[0]} > "~{outputFile}.~{outputExtension}"
   cat ~{sep=' ' filePaths} | sort -V -k 1,2 | grep -v ^chrom | grep -v ^chrM >> "~{outputFile}.~{outputExtension}"
   cat ~{sep=' ' filePaths} | awk '{if($1 == "chrM"){print $0}}' | sort -V -k 1,2 >> "~{outputFile}.~{outputExtension}"
   if [ ! -s ~{outputFile}.~{outputExtension} ] ; then
    rm ~{outputFile}.~{outputExtension}
   fi
- ```
+```
  
-  * Sort vcf using sequence dictionary
+### Sort vcf using sequence dictionary
  
- ```
+```
   java -Xmx[MEMORY]G -jar picard.jar SortVcf I=INPUT_VCFS SD=SEQ_DICTIONARY O=OUTPUT_FILE.SUFFIX.vcf
  
- ```
+```
  
-  * SNP/Indel Calling:
+### SNP/Indel Calling:
  
- ```
+```
    See the full source code in .wdl, here we run this command:
  
    zcat INPUT_PILEUP | java -Xmx[MEMORY]G -jar varscan somatic -mpileup 1 
@@ -208,11 +217,11 @@ Output | Type | Description
  
      --output-snp SAMPLE_ID.snp --output-indel SAMPLE_ID.indel
  
- ```
+```
  
-  * Find minimum coverage threshold for CV analysis:
+### Find minimum coverage threshold for CV analysis:
  
- ```
+```
  
  A python code configures and runs this command: 
  
@@ -220,11 +229,11 @@ Output | Type | Description
  
  Varscan reports if the coverage threshold was sufficient for the analysis. We use this coverage setting in the next step
  
- ```
+```
  
- ### Run copy number change analysis:
+### Run copy number change analysis:
  
- ```
+```
  
  A python code configures and runs this command:
   
@@ -242,9 +251,9 @@ Output | Type | Description
                     --recenter-up     RECENTER_UP
                     --recenter-down   RECENTER_DOWN
  
- ```
+```
  
- ## Support
+## Support
 
 For support, please file an issue on the [Github project](https://github.com/oicr-gsi) or send an email to gsi@oicr.on.ca .
 
