@@ -2,9 +2,13 @@
 
 This section lists command(s) run by varscan workflow
 
-### Running varscan
+ * Produce a scaling coefficient for allocating RAM
 
-Varscan is used to call SNV and CV events
+```
+    CHROM=$(echo ~{region} | sed 's/:.*//')
+    grep -w SN:$CHROM ~{refDict} | cut -f 3 | sed 's/.*://' | awk '{print int(($1/~{largestChrom} + 0.1) * 10)/10}'
+  
+```
 
  * Preprocessing
 
