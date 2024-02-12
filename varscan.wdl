@@ -258,6 +258,7 @@ input {
  String region 
  Float scaleCoefficient = 1.0
  Int jobMemory   = 18
+ Int minMemory = 6
  Int timeout     = 40
 }
 
@@ -272,8 +273,11 @@ parameter_meta {
   region: "Region in a form of chrX:12000-12500 for mpileup command"
   scaleCoefficient: "Scaling coefficient for RAM allocation, depends on chromosome size"
   jobMemory: "memory for this job, in Gb"
+  minMemory: "Minimal amount of memory to assign to the task"
   timeout: "Timeout in hours, needed to override imposed limits"
 }
+
+Int allocatedMemory = if minMemory > round(jobMemory * scaleCoefficient) then minMemory else round(jobMemory * scaleCoefficient)
 
 command <<<
  set -euxo pipefail
@@ -281,7 +285,7 @@ command <<<
 >>>
 
 runtime {
- memory: "~{round(jobMemory * scaleCoefficient)} GB"
+ memory: "~{allocatedMemory} GB"
  modules: "~{modules}"
  timeout: "~{timeout}"
 }
@@ -384,6 +388,7 @@ input {
   String sampleID ="VARSCAN"
   Float pValue = 0.05
   Int jobMemory  = 20
+  Int minMemory = 4
   Int javaMemory = 6
   Int minCoverage = 8
   Int minCoverageNormal = 8
@@ -419,6 +424,7 @@ parameter_meta {
  validation: "If set to 1, outputs all compared positions even if non-variant"
  scaleCoefficient: "Scaling coefficient for RAM allocation, depends on chromosome size"
  jobMemory: "Memory in Gb for this job"
+ minMemory: "A minimum amount of memory allocated to the task, overrides the scaled RAM setting"
  javaMemory: "Memory in Gb for Java"
  logFile: "File for logging Varscan messages"
  outputVcf: "Flag that when set to 1 indicates that we need results in vcf format"
@@ -426,6 +432,8 @@ parameter_meta {
  modules: "Names and versions of modules"
  timeout: "Timeout in hours, needed to override imposed limits"
 }
+
+Int allocatedMemory = if minMemory > round(jobMemory * scaleCoefficient) then minMemory else round(jobMemory * scaleCoefficient)
 
 command <<<
  unset _JAVA_OPTIONS
@@ -490,7 +498,7 @@ command <<<
 >>>
 
 runtime {
-  memory: "~{round(jobMemory * scaleCoefficient)} GB"
+  memory: "~{allocatedMemory} GB"
   modules: "~{modules}"
   timeout: "~{timeout}"
 }
@@ -513,6 +521,7 @@ input {
   Float pValue = 0.05
   Float scaleCoefficient = 1.0
   Int jobMemory  = 20
+  Int minMemory = 4
   Int javaMemory = 6
   String logFile = "VARSCAN_CNV.log"
   String varScan = "$VARSCAN_ROOT/VarScan.jar"
@@ -525,6 +534,7 @@ parameter_meta {
  sampleID: "This is used as a prefix for output files"
  pValue: "p-value for cnv calling, default is 0.05"
  jobMemory: "Memory in Gb for this job"
+ minMemory: "A minimum amount of memory allocated to the task, overrides the scaled RAM setting"
  javaMemory: "Memory in Gb for Java"
  logFile: "File for logging Varscan messages"
  scaleCoefficient: "Scaling coefficient for RAM allocation, depends on chromosome size"
@@ -532,6 +542,8 @@ parameter_meta {
  modules: "Names and versions of modules"
  timeout: "Timeout in hours, needed to override imposed limits"
 }
+
+Int allocatedMemory = if minMemory > round(jobMemory * scaleCoefficient) then minMemory else round(jobMemory * scaleCoefficient)
 
 command <<<
  unset _JAVA_OPTIONS
@@ -572,7 +584,7 @@ command <<<
 >>>
 
 runtime {
-  memory: "~{round(jobMemory * scaleCoefficient)} GB"
+  memory: "~{allocatedMemory} GB"
   modules: "~{modules}"
   timeout: "~{timeout}"
 }

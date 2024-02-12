@@ -1,3 +1,5 @@
+## 2.4.1 - 2024-02-12
+- Added minMemory parameter to tasks using RAM scaling (to handle small chromosomes better)
 ## 2.4.0 - 2023-12-16
 - Added scaling RAM assignment by chromosome for scattered tasks
 ## 2.3.0 - 2023-06-21

@@ -51,9 +51,11 @@ Parameter|Value|Default|Description
 `getChrCoefficient.timeout`|Int|1|Hours before task timeout
 `makePileups.samtools`|String|"$SAMTOOLS_ROOT/bin/samtools"|path to samtools
 `makePileups.jobMemory`|Int|18|memory for this job, in Gb
+`makePileups.minMemory`|Int|6|Minimal amount of memory to assign to the task
 `makePileups.timeout`|Int|40|Timeout in hours, needed to override imposed limits
 `runVarscanCNV.pValue`|Float|0.05|p-value for cnv calling, default is 0.05
 `runVarscanCNV.jobMemory`|Int|20|Memory in Gb for this job
+`runVarscanCNV.minMemory`|Int|4|A minimum amount of memory allocated to the task, overrides the scaled RAM setting
 `runVarscanCNV.javaMemory`|Int|6|Memory in Gb for Java
 `runVarscanCNV.logFile`|String|"VARSCAN_CNV.log"|File for logging Varscan messages
 `runVarscanCNV.varScan`|String|"$VARSCAN_ROOT/VarScan.jar"|path to varscan .jar file
@@ -61,6 +63,7 @@ Parameter|Value|Default|Description
 `runVarscanCNV.timeout`|Int|40|Timeout in hours, needed to override imposed limits
 `getSnvNative.pValue`|Float|0.05|somatic p-value for SNV calling, default is 0.05
 `getSnvNative.jobMemory`|Int|20|Memory in Gb for this job
+`getSnvNative.minMemory`|Int|4|A minimum amount of memory allocated to the task, overrides the scaled RAM setting
 `getSnvNative.javaMemory`|Int|6|Memory in Gb for Java
 `getSnvNative.minCoverage`|Int|8|Minimum coverage in normal and tumor to call variant [8]
 `getSnvNative.minCoverageNormal`|Int|8|Minimum coverage in normal to call somatic [8]
@@ -79,6 +82,7 @@ Parameter|Value|Default|Description
 `getSnvNative.timeout`|Int|40|Timeout in hours, needed to override imposed limits
 `getSnvVcf.pValue`|Float|0.05|somatic p-value for SNV calling, default is 0.05
 `getSnvVcf.jobMemory`|Int|20|Memory in Gb for this job
+`getSnvVcf.minMemory`|Int|4|A minimum amount of memory allocated to the task, overrides the scaled RAM setting
 `getSnvVcf.javaMemory`|Int|6|Memory in Gb for Java
 `getSnvVcf.minCoverage`|Int|8|Minimum coverage in normal and tumor to call variant [8]
 `getSnvVcf.minCoverageNormal`|Int|8|Minimum coverage in normal to call somatic [8]
