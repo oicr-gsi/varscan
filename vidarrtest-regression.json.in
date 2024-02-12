@@ -330,6 +330,7 @@
             "varscan.outputFileNamePrefix": "PCSI0090_chr22_intervals",
             "varscan.runVarscanCNV.javaMemory": null,
             "varscan.runVarscanCNV.jobMemory": null,
+            "varscan.runVarscanCNV.minMemory": null,
             "varscan.runVarscanCNV.logFile": null,
             "varscan.runVarscanCNV.modules": null,
             "varscan.runVarscanCNV.pValue": null,
