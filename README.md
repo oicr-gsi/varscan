@@ -30,9 +30,6 @@ Parameter|Value|Description
 `inputNormalIndex`|File|input .bai file for normal sample
 `reference`|String|Reference assembly id, hg19 hg38 or mm10
 `outputFileNamePrefix`|String|Output file(s) prefix
-`runVarscanCNV.scaleCoefficient`|Float|Scaling coefficient for RAM allocation, depends on chromosome size
-`getSnvNative.scaleCoefficient`|Float|Scaling coefficient for RAM allocation, depends on chromosome size
-`getSnvVcf.scaleCoefficient`|Float|Scaling coefficient for RAM allocation, depends on chromosome size
 
 
 #### Optional workflow parameters:
@@ -126,13 +123,13 @@ Parameter|Value|Default|Description
 
 ### Outputs
 
-Output | Type | Description
----|---|---
-`resultCnvFile`|File?|file with CNV calls, smoothed
-`resultSnpFile`|File|file with SNPs, native varscan format
-`resultIndelFile`|File|file with Indel calls, native varscan format
-`resultSnpVcfFile`|File|file with SNPs, vcf format
-`resultIndelVcfFile`|File|file with Indels, vcf format
+Output | Type | Description | Labels
+---|---|---|---
+`resultCnvFile`|File?|file with CNV calls, smoothed|vidarr_label: resultCnvFile
+`resultSnpFile`|File|file with SNPs, native varscan format|vidarr_label: resultSnpFile
+`resultIndelFile`|File|file with Indel calls, native varscan format|vidarr_label: resultIndelFile
+`resultSnpVcfFile`|File|file with SNPs, vcf format|vidarr_label: resultSnpVcfFile
+`resultIndelVcfFile`|File|file with Indels, vcf format|vidarr_label: resultIndelVcfFile
 
 
 ## Commands

@@ -1,3 +1,5 @@
+## 2.5.0 - 2024-06-25
+[GRD-797](https://jira.oicr.on.ca/browse/GRD-797) - add vidarr labels to outputs (changes to medata only)
 ## 2.4.1 - 2024-02-12
 - Added minMemory parameter to tasks using RAM scaling (to handle small chromosomes better)
 ## 2.4.0 - 2023-12-16
