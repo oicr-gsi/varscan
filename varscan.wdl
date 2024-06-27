@@ -126,12 +126,27 @@ meta {
     ]
     
     output_meta: {
-      resultCnvFile: "file with CNV calls, smoothed",
-      resultSnpFile: "file with SNPs, native varscan format",
-      resultIndelFile: "file with Indel calls, native varscan format",
-      resultSnpVcfFile: "file with SNPs, vcf format",
-      resultIndelVcfFile: "file with Indels, vcf format"
+    resultCnvFile: {
+        description: "file with CNV calls, smoothed",
+        vidarr_label: "resultCnvFile"
+    },
+    resultSnpFile: {
+        description: "file with SNPs, native varscan format",
+        vidarr_label: "resultSnpFile"
+    },
+    resultIndelFile: {
+        description: "file with Indel calls, native varscan format",
+        vidarr_label: "resultIndelFile"
+    },
+    resultSnpVcfFile: {
+        description: "file with SNPs, vcf format",
+        vidarr_label: "resultSnpVcfFile"
+    },
+    resultIndelVcfFile: {
+        description: "file with Indels, vcf format",
+        vidarr_label: "resultIndelVcfFile"
     }
+}
 }
 
 parameter_meta {
