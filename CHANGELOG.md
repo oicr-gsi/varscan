@@ -1,3 +1,5 @@
+## 2.5.1 - 2025-03-10
+- Added vcfCombine task to create a final bgzipped vcf with both indels and cnv
 ## 2.5.0 - 2024-06-25
 [GRD-797](https://jira.oicr.on.ca/browse/GRD-797) - add vidarr labels to outputs (changes to medata only)
 ## 2.4.1 - 2024-02-12
