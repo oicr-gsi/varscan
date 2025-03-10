@@ -144,7 +144,14 @@
             "varscan.smoothData.modules": null,
             "varscan.smoothData.recenter_down": null,
             "varscan.smoothData.recenter_up": null,
-            "varscan.smoothData.varScan": null
+            "varscan.smoothData.varScan": null,
+            "varscan.vcfCombine.vcfSnvs": null,
+            "varscan.vcfCombine.vcfIndels": null,
+            "varscan.vcfCombine.modules": null,
+            "varscan.vcfCombine.outputFileNamePrefix": null,
+            "varscan.vcfCombine.jobMemory": null
+            "varscan.vcfCombine.threads": null,
+            "varscan.vcfCombine.timeout": null			
         },
         "description": "Varscan workflow test",
         "engineArguments": {
@@ -364,7 +371,14 @@
             "varscan.smoothData.modules": null,
             "varscan.smoothData.recenter_down": null,
             "varscan.smoothData.recenter_up": null,
-            "varscan.smoothData.varScan": null
+            "varscan.smoothData.varScan": null,
+            "varscan.vcfCombine.vcfSnvs": null,
+            "varscan.vcfCombine.vcfIndels": null,
+            "varscan.vcfCombine.modules": null,
+            "varscan.vcfCombine.outputFileNamePrefix": null,
+            "varscan.vcfCombine.jobMemory": null
+            "varscan.vcfCombine.threads": null,
+            "varscan.vcfCombine.timeout": null			
         },
         "description": "Varscan workflow test",
         "engineArguments": {
@@ -591,7 +605,14 @@
             "varscan.smoothData.modules": null,
             "varscan.smoothData.recenter_down": null,
             "varscan.smoothData.recenter_up": null,
-            "varscan.smoothData.varScan": null
+            "varscan.smoothData.varScan": null,
+            "varscan.vcfCombine.vcfSnvs": null,
+            "varscan.vcfCombine.vcfIndels": null,
+            "varscan.vcfCombine.modules": null,
+            "varscan.vcfCombine.outputFileNamePrefix": null,
+            "varscan.vcfCombine.jobMemory": null
+            "varscan.vcfCombine.threads": null,
+            "varscan.vcfCombine.timeout": null			
         },
         "description": "Varscan workflow test",
         "engineArguments": {
