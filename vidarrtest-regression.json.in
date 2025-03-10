@@ -192,6 +192,22 @@
                     }
                 ],
                 "type": "ALL"
+            },
+            "varscan.resultVcfFile": {
+                "contents": [
+                    {
+                        "outputDirectory": "@SCRATCH@/@DATE@_Workflow_varscan_PCSI_chr22_@JENKINSID@"
+                    }
+                ],
+                "type": "ALL"
+            },
+            "varscan.resultVcfFileIndex": {
+                "contents": [
+                    {
+                        "outputDirectory": "@SCRATCH@/@DATE@_Workflow_varscan_PCSI_chr22_@JENKINSID@"
+                    }
+                ],
+                "type": "ALL"
             }
         },
         "validators": [
@@ -393,6 +409,22 @@
                 "contents": [
                     {
                         "outputDirectory": "@SCRATCH@/@DATE@_Workflow_varscan_PCSI_chr22_intervals_@JENKINSID@"
+                    }
+                ],
+                "type": "ALL"
+            },
+            "varscan.resultVcfFile": {
+                "contents": [
+                    {
+                        "outputDirectory": "@SCRATCH@/@DATE@_Workflow_varscan_PCSI_chr22_@JENKINSID@"
+                    }
+                ],
+                "type": "ALL"
+            },
+            "varscan.resultVcfFileIndex": {
+                "contents": [
+                    {
+                        "outputDirectory": "@SCRATCH@/@DATE@_Workflow_varscan_PCSI_chr22_@JENKINSID@"
                     }
                 ],
                 "type": "ALL"
@@ -604,6 +636,22 @@
                 "contents": [
                     {
                         "outputDirectory": "@SCRATCH@/@DATE@_Workflow_varscan_MATS_chr22_@JENKINSID@"
+                    }
+                ],
+                "type": "ALL"
+            },
+            "varscan.resultVcfFile": {
+                "contents": [
+                    {
+                        "outputDirectory": "@SCRATCH@/@DATE@_Workflow_varscan_PCSI_chr22_@JENKINSID@"
+                    }
+                ],
+                "type": "ALL"
+            },
+            "varscan.resultVcfFileIndex": {
+                "contents": [
+                    {
+                        "outputDirectory": "@SCRATCH@/@DATE@_Workflow_varscan_PCSI_chr22_@JENKINSID@"
                     }
                 ],
                 "type": "ALL"
