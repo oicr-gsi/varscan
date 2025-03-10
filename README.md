@@ -235,15 +235,17 @@ Output | Type | Description | Labels
  
  ```
  set -eo pipefail
-         # bgzip and index the vcf files
- 	bgzip -c ~{vcfSnvs} > ~{outputFileNamePrefix}.varscan2_snv.vcf
- 	tabix ~{outputFileNamePrefix}.varscan2_snv.vcf.gz
- >-------bgzip -c ~{vcfSnvs} > ~{outputFileNamePrefix}.varscan2_indel.vcf
- >-------tabix ~{outputFileNamePrefix}.varscan2_snv.vcf.gz
-         # concat into a single output, bgzip and index
- 	bcftools concat -a -o ~{outputFileNamePrefix}.varscan2_all.vcf ~{outputFileNamePrefix}.varscan2_snv.vcf.gz ~{outputFileNamePrefix}.varscan2_indel.vcf.gz
- 	bgzip ~{outputFileNamePrefix}.varscan2_all.vcf
- 	tabix ~{outputFileNamePrefix}.varscan2_all.vcf.gz
+ 
+ # bgzip and index the vcf files
+ bgzip -c ~{vcfSnvs} > ~{outputFileNamePrefix}.varscan2_snv.vcf
+ tabix ~{outputFileNamePrefix}.varscan2_snv.vcf.gz
+ bgzip -c ~{vcfSnvs} > ~{outputFileNamePrefix}.varscan2_indel.vcf
+ tabix ~{outputFileNamePrefix}.varscan2_snv.vcf.gz
+ 
+ # concat into a single output, bgzip and index
+ bcftools concat -a -o ~{outputFileNamePrefix}.varscan2_all.vcf ~{outputFileNamePrefix}.varscan2_snv.vcf.gz ~{outputFileNamePrefix}.varscan2_indel.vcf.gz
+ bgzip ~{outputFileNamePrefix}.varscan2_all.vcf
+ tabix ~{outputFileNamePrefix}.varscan2_all.vcf.gz
  ```
  
  
