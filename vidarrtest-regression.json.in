@@ -149,7 +149,7 @@
             "varscan.vcfCombine.vcfIndels": null,
             "varscan.vcfCombine.modules": null,
             "varscan.vcfCombine.outputFileNamePrefix": null,
-            "varscan.vcfCombine.jobMemory": null
+            "varscan.vcfCombine.jobMemory": null,
             "varscan.vcfCombine.threads": null,
             "varscan.vcfCombine.timeout": null			
         },
@@ -376,7 +376,7 @@
             "varscan.vcfCombine.vcfIndels": null,
             "varscan.vcfCombine.modules": null,
             "varscan.vcfCombine.outputFileNamePrefix": null,
-            "varscan.vcfCombine.jobMemory": null
+            "varscan.vcfCombine.jobMemory": null,
             "varscan.vcfCombine.threads": null,
             "varscan.vcfCombine.timeout": null			
         },
@@ -610,7 +610,7 @@
             "varscan.vcfCombine.vcfIndels": null,
             "varscan.vcfCombine.modules": null,
             "varscan.vcfCombine.outputFileNamePrefix": null,
-            "varscan.vcfCombine.jobMemory": null
+            "varscan.vcfCombine.jobMemory": null,
             "varscan.vcfCombine.threads": null,
             "varscan.vcfCombine.timeout": null			
         },
