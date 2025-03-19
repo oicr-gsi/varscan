@@ -101,9 +101,15 @@ if (length(cNumberFile) == 1) {
     call smoothData{input: copyNumberFile = mergeCNV.mergedVariants, sampleID = sampleID}
 }
 
+### merge the snv and indel vcf into a single file
+call vcfCombine {   input: vcfSnvs = mergeSNPvcf.mergedVcf,
+                           vcfIndels = mergeINDvcf.mergedVcf,
+                           outputFileNamePrefix = outputFileNamePrefix
+}
+
 meta {
-  author: "Peter Ruzanov"
-  email: "pruzanov@oicr.on.ca"
+  author: "Peter Ruzanov, Lawrence Heisler"
+  email: "pruzanov@oicr.on.ca, lheisler@oicr.on.ca"
   description: "Varscan 2.3, workflow for calling SNVs and CVs\nCreation of mpileups and calling variants are done with parallel processing\n\n![varscan outputs](docs/Screenshot_Varscan.png)"
 
   dependencies: [
@@ -122,6 +128,10 @@ meta {
       {
         name: "rstats/3.6",
         url: "http://cran.utstat.utoronto.ca/src/base/R-3/R-3.6.1.tar.gz"
+      },
+      {
+         name: "bcftools/1.9",
+         url: "https://github.com/samtools/bcftools"
       }
     ]
     
@@ -145,7 +155,17 @@ meta {
     resultIndelVcfFile: {
         description: "file with Indels, vcf format",
         vidarr_label: "resultIndelVcfFile"
+    },
+    resultVcfFile: {
+        description: "file with snvs + indels, vcf format, bgzipped",
+        vidarr_label: "resultVcfFile"
+    },
+    resultVcfFileIndex: {
+        description: "index file for snv + indels vcf output",
+        vidarr_label: "resultVcfFileIndex"
     }
+
+
 }
 }
 
@@ -166,9 +186,76 @@ output {
  File resultIndelFile    = mergeIND.mergedVariants
  File resultSnpVcfFile   = mergeSNPvcf.mergedVcf
  File resultIndelVcfFile = mergeINDvcf.mergedVcf
+ File resultVcfFile      = vcfCombine.vcf
+ File resultVcfFileIndex = vcfCombine.vcfIndex
 }
 
 }
+
+
+# ================================================================
+#  Combine the indel and snv vcfs into a single ouutput
+# ================================================================
+
+task vcfCombine {
+    input {
+	   File vcfSnvs
+	   File vcfIndels
+	   String modules = "bcftools/1.9 tabix/1.9"
+	   String outputFileNamePrefix
+	   Int jobMemory = 16
+	   Int threads = 4
+	   Int timeout = 4	   
+	
+	}
+
+    parameter_meta {
+	vcfSnvs: "vcf file with snvs"
+	vcfIndels: "vcf file with indels"
+	modules: "environment modules"
+	jobMemory: "Memory allocated for job"
+	timeout: "Hours before task timeout"
+	threads: "Number of threads for processing"
+    }
+
+	
+    command <<<
+	set -eo pipefail
+	
+	bgzip -c ~{vcfSnvs} > ~{outputFileNamePrefix}.varscan2_snv.vcf.gz
+	tabix ~{outputFileNamePrefix}.varscan2_snv.vcf.gz
+	bgzip -c ~{vcfIndels} > ~{outputFileNamePrefix}.varscan2_indel.vcf.gz
+	tabix ~{outputFileNamePrefix}.varscan2_indel.vcf.gz
+	bcftools concat -a -o ~{outputFileNamePrefix}.varscan2_all.vcf ~{outputFileNamePrefix}.varscan2_snv.vcf.gz ~{outputFileNamePrefix}.varscan2_indel.vcf.gz
+	bgzip ~{outputFileNamePrefix}.varscan2_all.vcf
+	tabix ~{outputFileNamePrefix}.varscan2_all.vcf.gz
+
+	>>>
+	
+    runtime {
+	modules: "~{modules}"
+	memory:  "~{jobMemory} GB"
+	cpu:     "~{threads}"
+	timeout: "~{timeout}"
+    }
+
+    output {
+	File vcf = "~{outputFileNamePrefix}.varscan2_all.vcf.gz"
+	File vcfIndex = "~{outputFileNamePrefix}.varscan2_all.vcf.gz.tbi"
+    }
+    
+	meta {
+	output_meta: {
+	    vcf: "VCF file with snvs and indels, bgzip compressed",
+	    vcfIndex: "tabix index"
+	}
+    }
+		
+
+}
+
+
+
 
 
 # ================================================================

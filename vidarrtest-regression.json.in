@@ -144,7 +144,14 @@
             "varscan.smoothData.modules": null,
             "varscan.smoothData.recenter_down": null,
             "varscan.smoothData.recenter_up": null,
-            "varscan.smoothData.varScan": null
+            "varscan.smoothData.varScan": null,
+            "varscan.vcfCombine.vcfSnvs": null,
+            "varscan.vcfCombine.vcfIndels": null,
+            "varscan.vcfCombine.modules": null,
+            "varscan.vcfCombine.outputFileNamePrefix": null,
+            "varscan.vcfCombine.jobMemory": null,
+            "varscan.vcfCombine.threads": null,
+            "varscan.vcfCombine.timeout": null			
         },
         "description": "Varscan workflow test",
         "engineArguments": {
@@ -186,6 +193,22 @@
                 "type": "ALL"
             },
             "varscan.resultSnpVcfFile": {
+                "contents": [
+                    {
+                        "outputDirectory": "@SCRATCH@/@DATE@_Workflow_varscan_PCSI_chr22_@JENKINSID@"
+                    }
+                ],
+                "type": "ALL"
+            },
+            "varscan.resultVcfFile": {
+                "contents": [
+                    {
+                        "outputDirectory": "@SCRATCH@/@DATE@_Workflow_varscan_PCSI_chr22_@JENKINSID@"
+                    }
+                ],
+                "type": "ALL"
+            },
+            "varscan.resultVcfFileIndex": {
                 "contents": [
                     {
                         "outputDirectory": "@SCRATCH@/@DATE@_Workflow_varscan_PCSI_chr22_@JENKINSID@"
@@ -348,7 +371,14 @@
             "varscan.smoothData.modules": null,
             "varscan.smoothData.recenter_down": null,
             "varscan.smoothData.recenter_up": null,
-            "varscan.smoothData.varScan": null
+            "varscan.smoothData.varScan": null,
+            "varscan.vcfCombine.vcfSnvs": null,
+            "varscan.vcfCombine.vcfIndels": null,
+            "varscan.vcfCombine.modules": null,
+            "varscan.vcfCombine.outputFileNamePrefix": null,
+            "varscan.vcfCombine.jobMemory": null,
+            "varscan.vcfCombine.threads": null,
+            "varscan.vcfCombine.timeout": null			
         },
         "description": "Varscan workflow test",
         "engineArguments": {
@@ -393,6 +423,22 @@
                 "contents": [
                     {
                         "outputDirectory": "@SCRATCH@/@DATE@_Workflow_varscan_PCSI_chr22_intervals_@JENKINSID@"
+                    }
+                ],
+                "type": "ALL"
+            },
+            "varscan.resultVcfFile": {
+                "contents": [
+                    {
+                        "outputDirectory": "@SCRATCH@/@DATE@_Workflow_varscan_PCSI_chr22_@JENKINSID@"
+                    }
+                ],
+                "type": "ALL"
+            },
+            "varscan.resultVcfFileIndex": {
+                "contents": [
+                    {
+                        "outputDirectory": "@SCRATCH@/@DATE@_Workflow_varscan_PCSI_chr22_@JENKINSID@"
                     }
                 ],
                 "type": "ALL"
@@ -559,7 +605,14 @@
             "varscan.smoothData.modules": null,
             "varscan.smoothData.recenter_down": null,
             "varscan.smoothData.recenter_up": null,
-            "varscan.smoothData.varScan": null
+            "varscan.smoothData.varScan": null,
+            "varscan.vcfCombine.vcfSnvs": null,
+            "varscan.vcfCombine.vcfIndels": null,
+            "varscan.vcfCombine.modules": null,
+            "varscan.vcfCombine.outputFileNamePrefix": null,
+            "varscan.vcfCombine.jobMemory": null,
+            "varscan.vcfCombine.threads": null,
+            "varscan.vcfCombine.timeout": null			
         },
         "description": "Varscan workflow test",
         "engineArguments": {
@@ -604,6 +657,22 @@
                 "contents": [
                     {
                         "outputDirectory": "@SCRATCH@/@DATE@_Workflow_varscan_MATS_chr22_@JENKINSID@"
+                    }
+                ],
+                "type": "ALL"
+            },
+            "varscan.resultVcfFile": {
+                "contents": [
+                    {
+                        "outputDirectory": "@SCRATCH@/@DATE@_Workflow_varscan_PCSI_chr22_@JENKINSID@"
+                    }
+                ],
+                "type": "ALL"
+            },
+            "varscan.resultVcfFileIndex": {
+                "contents": [
+                    {
+                        "outputDirectory": "@SCRATCH@/@DATE@_Workflow_varscan_PCSI_chr22_@JENKINSID@"
                     }
                 ],
                 "type": "ALL"

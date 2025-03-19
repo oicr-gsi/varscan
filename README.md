@@ -2,7 +2,10 @@
 
 Varscan 2.3, workflow for calling SNVs and CVs
 Creation of mpileups and calling variants are done with parallel processing
+
 ![varscan outputs](docs/Screenshot_Varscan.png)
+
+## Overview
 
 ## Dependencies
 
@@ -10,6 +13,7 @@ Creation of mpileups and calling variants are done with parallel processing
 * [varscan 2.4.2](http://varscan.sourceforge.net)
 * [samtools 0.1.19](http://www.htslib.org/)
 * [rstats 3.6](http://cran.utstat.utoronto.ca/src/base/R-3/R-3.6.1.tar.gz)
+* [bcftools 1.9](https://github.com/samtools/bcftools)
 
 
 ## Usage
@@ -119,6 +123,10 @@ Parameter|Value|Default|Description
 `smoothData.recenter_down`|Int|0|Fine-tuning parameter for VarScan
 `smoothData.jobMemory`|Int|16|Memory in Gb for this job
 `smoothData.javaMemory`|Int|6|Memory in Gb for Java
+`vcfCombine.modules`|String|"bcftools/1.9 tabix/1.9"|environment modules
+`vcfCombine.jobMemory`|Int|16|Memory allocated for job
+`vcfCombine.threads`|Int|4|Number of threads for processing
+`vcfCombine.timeout`|Int|4|Hours before task timeout
 
 
 ### Outputs
@@ -130,26 +138,28 @@ Output | Type | Description | Labels
 `resultIndelFile`|File|file with Indel calls, native varscan format|vidarr_label: resultIndelFile
 `resultSnpVcfFile`|File|file with SNPs, vcf format|vidarr_label: resultSnpVcfFile
 `resultIndelVcfFile`|File|file with Indels, vcf format|vidarr_label: resultIndelVcfFile
+`resultVcfFile`|File|file with snvs + indels, vcf format, bgzipped|vidarr_label: resultVcfFile
+`resultVcfFileIndex`|File|index file for snv + indels vcf output|vidarr_label: resultVcfFileIndex
 
 
 ## Commands
  
-This section lists command(s) run by varscan workflow
+ This section lists command(s) run by varscan workflow
  
-### Produce a scaling coefficient for allocating RAM
+  * Produce a scaling coefficient for allocating RAM
  
-```
-   CHROM=$(echo ~{region} | sed 's/:.*//')
-   grep -w SN:$CHROM ~{refDict} | cut -f 3 | sed 's/.*://' | awk '{print int(($1/~{largestChrom} + 0.1) * 10)/10}'
+ ```
+     CHROM=$(echo ~{region} | sed 's/:.*//')
+     grep -w SN:$CHROM ~{refDict} | cut -f 3 | sed 's/.*://' | awk '{print int(($1/~{largestChrom} + 0.1) * 10)/10}'
    
-```
+ ```
  
-### Preprocessing
+  * Preprocessing
  
-bed file re-format to be used with scattered pileup creation. Note that it should be a resonable ( <100 perhaps? ) intervals
-so that we do not end up with a million jobs running. Use wisely, as it may result in grabbing a lot of compute nodes.
+ bed file re-format to be used with scattered pileup creation. Note that it should be a resonable ( <100 perhaps? ) intervals
+ so that we do not end up with a million jobs running. Use wisely, as it may result in grabbing a lot of compute nodes.
  
-```
+ ```
   In this embedded script we reformat bed lines into varscan-friendly intervals
  
   import os
@@ -162,36 +172,36 @@ so that we do not end up with a million jobs running. Use wisely, as it may resu
             print(r)
      f.close()
  
-```
+ ```
  
-### Run samtools mpileup
+  * Run samtools mpileup
  
-```
+ ```
   samtools mpileup -q 1 -r REGION -f REF_FASTA INPUT_NORMAL INPUT_TUMOR | awk -F "\t" '$4 > 0 && $7 > 0' | gzip -c > normtumor_sorted.pileup.gz 
  
-```
+ ```
  
-### Remove mitochondrial chromosome:
+  * Remove mitochondrial chromosome:
  
-```
+ ```
   head -n 1 ~{filePaths[0]} > "~{outputFile}.~{outputExtension}"
   cat ~{sep=' ' filePaths} | sort -V -k 1,2 | grep -v ^chrom | grep -v ^chrM >> "~{outputFile}.~{outputExtension}"
   cat ~{sep=' ' filePaths} | awk '{if($1 == "chrM"){print $0}}' | sort -V -k 1,2 >> "~{outputFile}.~{outputExtension}"
   if [ ! -s ~{outputFile}.~{outputExtension} ] ; then
    rm ~{outputFile}.~{outputExtension}
   fi
-```
+ ```
  
-### Sort vcf using sequence dictionary
+  * Sort vcf using sequence dictionary
  
-```
+ ```
   java -Xmx[MEMORY]G -jar picard.jar SortVcf I=INPUT_VCFS SD=SEQ_DICTIONARY O=OUTPUT_FILE.SUFFIX.vcf
  
-```
+ ```
  
-### SNP/Indel Calling:
+  * SNP/Indel Calling:
  
-```
+ ```
    See the full source code in .wdl, here we run this command:
  
    zcat INPUT_PILEUP | java -Xmx[MEMORY]G -jar varscan somatic -mpileup 1 
@@ -218,11 +228,31 @@ so that we do not end up with a million jobs running. Use wisely, as it may resu
  
      --output-snp SAMPLE_ID.snp --output-indel SAMPLE_ID.indel
  
-```
+ ```
  
-### Find minimum coverage threshold for CV analysis:
+   * Merge the SNVs and Indels into a single file
+     The vcfCombine tasks combines the data and indexes the bgzipped output
  
-```
+ ```
+ set -eo pipefail
+ 
+ # bgzip and index the vcf files
+ bgzip -c ~{vcfSnvs} > ~{outputFileNamePrefix}.varscan2_snv.vcf
+ tabix ~{outputFileNamePrefix}.varscan2_snv.vcf.gz
+ bgzip -c ~{vcfSnvs} > ~{outputFileNamePrefix}.varscan2_indel.vcf
+ tabix ~{outputFileNamePrefix}.varscan2_snv.vcf.gz
+ 
+ # concat into a single output, bgzip and index
+ bcftools concat -a -o ~{outputFileNamePrefix}.varscan2_all.vcf ~{outputFileNamePrefix}.varscan2_snv.vcf.gz ~{outputFileNamePrefix}.varscan2_indel.vcf.gz
+ bgzip ~{outputFileNamePrefix}.varscan2_all.vcf
+ tabix ~{outputFileNamePrefix}.varscan2_all.vcf.gz
+ ```
+ 
+ 
+ 
+  * Find minimum coverage threshold for CV analysis:
+ 
+ ```
  
  A python code configures and runs this command: 
  
@@ -230,11 +260,11 @@ so that we do not end up with a million jobs running. Use wisely, as it may resu
  
  Varscan reports if the coverage threshold was sufficient for the analysis. We use this coverage setting in the next step
  
-```
+ ```
  
-### Run copy number change analysis:
+ ### Run copy number change analysis:
  
-```
+ ```
  
  A python code configures and runs this command:
   
@@ -252,9 +282,9 @@ so that we do not end up with a million jobs running. Use wisely, as it may resu
                     --recenter-up     RECENTER_UP
                     --recenter-down   RECENTER_DOWN
  
-```
+ ```
  
-## Support
+ ## Support
 
 For support, please file an issue on the [Github project](https://github.com/oicr-gsi) or send an email to gsi@oicr.on.ca .
 
