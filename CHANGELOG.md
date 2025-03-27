@@ -4,8 +4,6 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-
-
 ## [2.5.1] - 2025-03-10
 ### Added
 - Added vcfCombine task to create a final bgzipped vcf with both indels and cnv
@@ -16,12 +14,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [2.4.1] - 2024-02-12
 ### Added
-
 - Added minMemory parameter to tasks using RAM scaling (to handle small chromosomes better)
 
 ## [2.4.0] - 2023-12-16
 ### Added
-
 - Added scaling RAM assignment by chromosome for scattered tasks
 
 ## [2.3.0] - 2023-06-21
@@ -32,7 +28,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Increment version to install varscan_matched in Vidarr
 
-## [Unreleased]
+## [Unreleased] - 2023-05-16
 ### Changed
 - updated README, explained passing interval file better
 
@@ -69,9 +65,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Introduced compression of mpileup data to conserve disk space
 
 ## [2.0] - 2020-01-31
+### Changed
 - Converting to wdl workflow, adding more output types to mesh well with sequenza
 
 ## [1.0] - 2017-08-16
+### Added
 - Initial implementation as a stand-alone workflow
 
 
