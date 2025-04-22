@@ -110,7 +110,7 @@ call vcfCombine {   input: vcfSnvs = mergeSNPvcf.mergedVcf,
 meta {
   author: "Peter Ruzanov, Lawrence Heisler"
   email: "pruzanov@oicr.on.ca, lheisler@oicr.on.ca"
-  description: "Varscan 2.3, workflow for calling SNVs and CVs\nCreation of mpileups and calling variants are done with parallel processing\n\n![varscan outputs](docs/Screenshot_Varscan.png)"
+  description: "Varscan 2.3, workflow for calling somatic single nucleotide variations and indels, as well as copy number changes\nCreation of mpileups and calling variants are done with parallel processing. Varscan uses original heuristic/statistical approach whish puts it apart of the other similar callers.\n\n![varscan outputs](docs/Screenshot_Varscan.png)"
 
   dependencies: [
       {

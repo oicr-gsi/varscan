@@ -4,6 +4,9 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased] - 2025-04-21
+[GRD-795](https://jira.oicr.on.ca/browse/GRD-795) - expanded built-in documentation
+
 ## [2.5.2] - 2025-03-10
 ## Added
 - Added vcfCombine task to create a final bgzipped vcf with both indels and cnv
