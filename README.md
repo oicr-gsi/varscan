@@ -1,7 +1,7 @@
 # varscan
 
-Varscan 2.3, workflow for calling SNVs and CVs
-Creation of mpileups and calling variants are done with parallel processing
+Varscan 2.3, workflow for calling somatic single nucleotide variations and indels, as well as copy number changes
+Creation of mpileups and calling variants are done with parallel processing. Varscan uses original heuristic/statistical approach whish puts it apart of the other similar callers.
 
 ![varscan outputs](docs/Screenshot_Varscan.png)
 
