@@ -75,13 +75,11 @@ scatter ( r in splitRegions )   {
                             region = r }
 
   # Configure and run Varscan
-  call runVarscanCNV { input: inputPileup = makePileups.pileup, sampleID = sampleID, scaleCoefficient = getChrCoefficient.coeff }
   call runVarscanSNV as getSnvNative { input: inputPileup = makePileups.pileup, sampleID = sampleID, scaleCoefficient = getChrCoefficient.coeff }
   call runVarscanSNV as getSnvVcf { input: inputPileup = makePileups.pileup, sampleID = sampleID, outputVcf = 1, scaleCoefficient = getChrCoefficient.coeff }
 }
 
 # Merge tasks
-call mergeVariantsNative as mergeCNV { input: filePaths = select_all(runVarscanCNV.resultFile), outputFile = sampleID, outputExtension = "copynumber" }
 call mergeVariantsNative as mergeSNP { input: filePaths = select_all(getSnvNative.snpFile), outputFile = sampleID, outputExtension = "snp" }
 call mergeVariantsNative as mergeIND { input: filePaths = select_all(getSnvNative.indelFile), outputFile = sampleID, outputExtension = "indel" }
 call mergeVariantsVcf as mergeSNPvcf { input: filePaths = select_all(getSnvVcf.snpVcfFile), 
@@ -95,12 +93,6 @@ call mergeVariantsVcf as mergeINDvcf { input: filePaths = select_all(getSnvVcf.i
                                               seqDictionary = resources[reference].refDict,
                                               modules = resources[reference].mergingModules }
 
-# Run post-processing job if we have results from runVarscanCNV
-Array[File] cNumberFile = [mergeCNV.mergedVariants]
-if (length(cNumberFile) == 1) {
-    call smoothData{input: copyNumberFile = mergeCNV.mergedVariants, sampleID = sampleID}
-}
-
 ### merge the snv and indel vcf into a single file
 call vcfCombine {   input: vcfSnvs = mergeSNPvcf.mergedVcf,
                            vcfIndels = mergeINDvcf.mergedVcf,
@@ -108,8 +100,8 @@ call vcfCombine {   input: vcfSnvs = mergeSNPvcf.mergedVcf,
 }
 
 meta {
-  author: "Peter Ruzanov, Lawrence Heisler"
-  email: "pruzanov@oicr.on.ca, lheisler@oicr.on.ca"
+  author: "Peter Ruzanov, Lawrence Heisler, Monica L. Rojas-Pena"
+  email: "pruzanov@oicr.on.ca, lheisler@oicr.on.ca, mrojaspena@oicr.on.ca"
   description: "Varscan 2.3, workflow for calling somatic single nucleotide variations and indels, as well as copy number changes\nCreation of mpileups and calling variants are done with parallel processing. Varscan uses original heuristic/statistical approach whish puts it apart of the other similar callers.\n\n![varscan outputs](docs/Screenshot_Varscan.png)"
 
   dependencies: [
@@ -136,10 +128,6 @@ meta {
     ]
     
     output_meta: {
-    resultCnvFile: {
-        description: "file with CNV calls, smoothed",
-        vidarr_label: "resultCnvFile"
-    },
     resultSnpFile: {
         description: "file with SNPs, native varscan format",
         vidarr_label: "resultSnpFile"
@@ -181,7 +169,6 @@ parameter_meta {
 }
 
 output {
- File? resultCnvFile     = smoothData.filteredData
  File resultSnpFile      = mergeSNP.mergedVariants
  File resultIndelFile    = mergeIND.mergedVariants
  File resultSnpVcfFile   = mergeSNPvcf.mergedVcf
@@ -359,9 +346,9 @@ input {
  String samtools = "$SAMTOOLS_ROOT/bin/samtools"
  String region 
  Float scaleCoefficient = 1.0
- Int jobMemory   = 18
- Int minMemory = 6
- Int timeout     = 40
+ Int jobMemory   = 8
+ Int minMemory = 4
+ Int timeout = 40
 }
 
 parameter_meta {
@@ -611,167 +598,5 @@ output {
   File? snpVcfFile = "~{sampleID}.snp.vcf"
   File? indelVcfFile = "~{sampleID}.indel.vcf"
 }
-}
-
-# ==========================================
-#  configure and run Varscan in CNV mode
-# ==========================================
-task runVarscanCNV {
-input {
-  File inputPileup
-  String sampleID ="VARSCAN"
-  Float pValue = 0.05
-  Float scaleCoefficient = 1.0
-  Int jobMemory  = 20
-  Int minMemory = 4
-  Int javaMemory = 6
-  String logFile = "VARSCAN_CNV.log"
-  String varScan = "$VARSCAN_ROOT/VarScan.jar"
-  String modules = "varscan/2.4.2 java/8"
-  Int timeout = 40
-}
-
-parameter_meta {
- inputPileup: "Input .pileup file for analysis"
- sampleID: "This is used as a prefix for output files"
- pValue: "p-value for cnv calling, default is 0.05"
- jobMemory: "Memory in Gb for this job"
- minMemory: "A minimum amount of memory allocated to the task, overrides the scaled RAM setting"
- javaMemory: "Memory in Gb for Java"
- logFile: "File for logging Varscan messages"
- scaleCoefficient: "Scaling coefficient for RAM allocation, depends on chromosome size"
- varScan: "path to varscan .jar file"
- modules: "Names and versions of modules"
- timeout: "Timeout in hours, needed to override imposed limits"
-}
-
-Int allocatedMemory = if minMemory > round(jobMemory * scaleCoefficient) then minMemory else round(jobMemory * scaleCoefficient)
-
-command <<<
- unset _JAVA_OPTIONS
- set -euxo pipefail
- python<<CODE
- import os
- import re
- varscan = os.path.expandvars("~{varScan}")
- varscanCommand = "zcat ~{inputPileup} | java -Xmx~{javaMemory}G -jar " + varscan + " copynumber --output-file ~{sampleID} -mpileup 1 --p-value ~{pValue}"
- cvg = 0
- resultsOk = False
- f = open("~{logFile}", "w+")
- f.write('[Varscan log]' + '\n')
-
- while not resultsOk:
-     run_command = varscanCommand
-     if cvg == 0:
-         cvg = 19
-     cvg -= 4
-     run_command += " --min-coverage " + str(cvg)
-     f.write('[' + run_command + ']\n')
-     res_string = os.popen(run_command + " 2>&1").read()
-     m = re.search(r'(\d+)', str(res_string))
-     m = re.search(r'(\d+) had sufficient coverage', res_string)
-     if not m or (m and m.group(1) == '0' and cvg <= 2):
-         f.write('Unable to run Varscan even with min-coverage set to ' + str(cvg) + ' aborting...\n')
-         break
-     elif m and m.group(1) != '0':
-         resultsOk = True
-         f.write('Success!\n')
-     else:
-         f.write('Coverage threshold too high, trying min-coverage ' + str(cvg) + '...\n')
-
- if not resultsOk:
-     f.write('Varscan failed\n')
- f.close()
- CODE
->>>
-
-runtime {
-  memory: "~{allocatedMemory} GB"
-  modules: "~{modules}"
-  timeout: "~{timeout}"
-}
-
-output {
-  File? resultFile = "~{sampleID}.copynumber"
-}
-}
-
-# ====================================================
-#  Additional smoothing for Varscan data. Visualization
-#  will be implemented after updates to rstats module
-#       needed to enable png/jpg rendering
-# ======================================================
-
-task smoothData {
-input {
- File copyNumberFile
- String varScan = "$VARSCAN_ROOT/VarScan.jar"
- String modules = "varscan/2.4.2 java/8 rstats/3.6"
- Int min_coverage  = 20
- Int max_homdel_coverage = 5
- Int min_tumor_coverage = 10
- Float del_threshold = 0.25
- Float amp_threshold = 0.25
- Int min_region_size = 10
- Int recenter_up = 0
- Int recenter_down = 0
- String sampleID ="VARSCAN"
- Int jobMemory  = 16
- Int javaMemory = 6
-}
-
-parameter_meta {
- copyNumberFile: "Output from Varscan"
- varScan: "Path to VarScan jar file"
- modules: "Modules for this job"
- min_coverage: "Fine-tuning parameter for VarScan"
- max_homdel_coverage: "Max coverage form homozygous deletion, default is 5"
- min_tumor_coverage: "Min coverage in tumor sample, default is 10"
- del_threshold: "Fine-tuning parameter for VarScan"
- amp_threshold: "Amplification threshold to report, default is 0.25"
- min_region_size: "Fine-tuning parameter for VarScan"
- recenter_up: "Fine-tuning parameter for VarScan"
- recenter_down: "Fine-tuning parameter for VarScan"
- sampleID: "sample id (used as prefix for result files)"
- jobMemory: "Memory in Gb for this job"
- javaMemory: "Memory in Gb for Java"
-}
-
-command <<<
- python<<CODE
- import os
- varscan = os.path.expandvars("~{varScan}")
- filterCommand = "java -Xmx~{javaMemory}G -jar " + varscan + " copyCaller ~{copyNumberFile} --output-file ~{sampleID}.copynumber.filtered"
-
- if "~{min_coverage}" != "20":
-    filterCommand += " --min-coverage ~{min_coverage}"
- if "~{min_tumor_coverage}" != "10":
-    filterCommand += " --min-tumor-coverage ~{min_tumor_coverage}"
- if "~{max_homdel_coverage}" != "5":
-    filterCommand += "--max-homdel-coverage ~{max_homdel_coverage}"
- if "~{del_threshold}" != "0.25":
-    filterCommand += " --del-threshold ~{del_threshold}"
- if "~{amp_threshold}" != "0.25":
-    filterCommand += " --amp-threshold ~{amp_threshold}"
- if "~{min_region_size}" != "10":
-    filterCommand += " --min-region-size ~{min_region_size}"
- if "~{recenter_up}" != "0":
-    filterCommand += " --recenter-up ~{recenter_up}"
- if "~{recenter_down}" != "0":
-    filterCommand += " --recenter-down ~{recenter_down}"
-
- message = os.popen(filterCommand + " 2>&1").read()
- CODE
->>>
-
-runtime {
-  memory:  "~{jobMemory} GB"
-  modules: "~{modules}"
-}
-
-output {
- File? filteredData = "~{sampleID}.copynumber.filtered"
-}
-
 }
 
