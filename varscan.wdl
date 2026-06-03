@@ -28,21 +28,21 @@ Map[String, Array[String]] regions = {
 
 Map[String,GenomeResources] resources = {
   "hg19":  {
-    "workflowModules": "samtools/0.1.19 hg19/p13",
+    "workflowModules": "samtools/1.16.1 hg19/p13",
     "refFasta": "$HG19_ROOT/hg19_random.fa",
     "mergingModules": "picard/2.21.2 hg19/p13",
     "refDict": "$HG19_ROOT/hg19_random.dict",
     "largest": "249250621"
   },
   "hg38": {
-    "workflowModules": "samtools/0.1.19 hg38/p12",
+    "workflowModules": "samtools/1.16.1 hg38/p12",
     "refFasta": "$HG38_ROOT/hg38_random.fa",
     "mergingModules": "picard/2.21.2 hg38/p12",
     "refDict": "$HG38_ROOT/hg38_random.dict",
     "largest": "248956422"
   },
   "mm10": {
-    "workflowModules": "samtools/0.1.19 mm10/p6",
+    "workflowModules": "samtools/1.16.1 mm10/p6",
     "refFasta": "$MM10_ROOT/mm10.fa",
     "mergingModules": "picard/2.21.2 mm10/p6",
     "refDict": "$MM10_ROOT/mm10.dict",
@@ -102,7 +102,7 @@ call vcfCombine {   input: vcfSnvs = mergeSNPvcf.mergedVcf,
 meta {
   author: "Peter Ruzanov, Lawrence Heisler, Monica L. Rojas-Pena"
   email: "pruzanov@oicr.on.ca, lheisler@oicr.on.ca, mrojaspena@oicr.on.ca"
-  description: "Varscan 2.3, workflow for calling somatic single nucleotide variations and indels, as well as copy number changes\nCreation of mpileups and calling variants are done with parallel processing. Varscan uses original heuristic/statistical approach whish puts it apart of the other similar callers.\n\n![varscan outputs](docs/Screenshot_Varscan.png)"
+  description: "Varscan 2.3, workflow for calling somatic single nucleotide variations and indels, as well as copy number changes\nCreation of mpileups and calling variants are done with parallel processing. Varscan uses original heuristic/statistical approach which puts it apart of the other similar callers.\n\n![varscan outputs](docs/Screenshot_Varscan.png)"
 
   dependencies: [
       {
@@ -114,7 +114,7 @@ meta {
         url: "http://varscan.sourceforge.net"
       },
       {
-        name: "samtools/0.1.19",
+        name: "samtools/1.16.1",
         url: "http://www.htslib.org/"
       },
       {
@@ -385,7 +385,7 @@ output {
 }
 
 #=============================================================
-# Task for concatenating CNV and SNV variants
+# Task for concatenating SNV variants
 #=============================================================
 task mergeVariantsNative {
 input {
@@ -426,7 +426,7 @@ output {
 
 
 #=============================================================
-# Task for concatenating CNV and SNV variants
+# Task for concatenating SNV variants
 #=============================================================
 task mergeVariantsVcf {
 input {
