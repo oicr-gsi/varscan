@@ -1,23 +1,26 @@
 ## Commands
-
 This section lists command(s) run by varscan workflow
 
- * Produce a scaling coefficient for allocating RAM
+* Running varscan
 
+```
+	set -eo pipefail
+	
+	bgzip -c ~{vcfSnvs} > ~{outputFileNamePrefix}.varscan2_snv.vcf.gz
+	tabix ~{outputFileNamePrefix}.varscan2_snv.vcf.gz
+	bgzip -c ~{vcfIndels} > ~{outputFileNamePrefix}.varscan2_indel.vcf.gz
+	tabix ~{outputFileNamePrefix}.varscan2_indel.vcf.gz
+	bcftools concat -a -o ~{outputFileNamePrefix}.varscan2_all.vcf ~{outputFileNamePrefix}.varscan2_snv.vcf.gz ~{outputFileNamePrefix}.varscan2_indel.vcf.gz
+	bgzip ~{outputFileNamePrefix}.varscan2_all.vcf
+	tabix ~{outputFileNamePrefix}.varscan2_all.vcf.gz
+
+```
 ```
     CHROM=$(echo ~{region} | sed 's/:.*//')
     grep -w SN:$CHROM ~{refDict} | cut -f 3 | sed 's/.*://' | awk '{print int(($1/~{largestChrom} + 0.1) * 10)/10}'
-  
 ```
-
- * Preprocessing
-
-bed file re-format to be used with scattered pileup creation. Note that it should be a resonable ( <100 perhaps? ) intervals
-so that we do not end up with a million jobs running. Use wisely, as it may result in grabbing a lot of compute nodes.
-
 ```
- In this embedded script we reformat bed lines into varscan-friendly intervals
-
+ python <<CODE
  import os
  if os.path.exists("~{bedPath}"):
     with open("~{bedPath}") as f:
@@ -27,19 +30,14 @@ so that we do not end up with a million jobs running. Use wisely, as it may resu
            r = " " + tmp[0] + ":" + tmp[1] + "-" + tmp[2]
            print(r)
     f.close()
-
+ CODE
 ```
-
- * Run samtools mpileup
-
 ```
- samtools mpileup -q 1 -r REGION -f REF_FASTA INPUT_NORMAL INPUT_TUMOR | awk -F "\t" '$4 > 0 && $7 > 0' | gzip -c > normtumor_sorted.pileup.gz 
-
+ set -euxo pipefail
+ ~{samtools} mpileup -q 1 -r ~{region} -f ~{refFasta} ~{inputNormal} ~{inputTumor} | awk -F "\t" '$4 > 0 && $7 > 0' | gzip -c > normtumor_sorted.pileup.gz 
 ```
-
- * Remove mitochondrial chromosome:
-
 ```
+ set -euo pipefail
  head -n 1 ~{filePaths[0]} > "~{outputFile}.~{outputExtension}"
  cat ~{sep=' ' filePaths} | sort -V -k 1,2 | grep -v ^chrom | grep -v ^chrM >> "~{outputFile}.~{outputExtension}"
  cat ~{sep=' ' filePaths} | awk '{if($1 == "chrM"){print $0}}' | sort -V -k 1,2 >> "~{outputFile}.~{outputExtension}"
@@ -47,96 +45,132 @@ so that we do not end up with a million jobs running. Use wisely, as it may resu
   rm ~{outputFile}.~{outputExtension}
  fi
 ```
-
- * Sort vcf using sequence dictionary
-
 ```
- java -Xmx[MEMORY]G -jar picard.jar SortVcf I=INPUT_VCFS SD=SEQ_DICTIONARY O=OUTPUT_FILE.SUFFIX.vcf
-
+ set -euxo pipefail
+ unset _JAVA_OPTIONS
+ java -Xmx~{javaMemory}G -Djava.io.tmpdir="$TMP" -jar $PICARD_ROOT/picard.jar SortVcf I=~{sep=' I=' filePaths} SD=~{seqDictionary} O=~{outputFile}.~{outputSuffix}.vcf
 ```
-
- * SNP/Indel Calling:
-
 ```
-  See the full source code in .wdl, here we run this command:
+ unset _JAVA_OPTIONS
+ set -euxo pipefail
+ python<<CODE
+ import os
+ import re
+ varscan = os.path.expandvars("~{varScan}")
+ varscanCommand = "zcat ~{inputPileup} | java -Xmx~{javaMemory}G -jar " + varscan + " somatic -mpileup 1 --somatic-p-value ~{pValue}"
 
-  zcat INPUT_PILEUP | java -Xmx[MEMORY]G -jar varscan somatic -mpileup 1 
-     --somatic-p-value P_VALUE
+ if "~{minCoverageNormal}" != "8":
+    varscanCommand += " --min-coverage-normal ~{minCoverageNormal}"
+ if "~{minCoverageTumor}" != "6":
+    varscanCommand += " --min-coverage-tumor ~{minCoverageTumor}"
+ if "~{minVarFreq}" != "0.1":
+    varscanCommand += " --min-var-freq ~{minVarFreq}"
+ if "~{minFreqForHom}" != "0.75":
+    varscanCommand += " --min-freq-for-hom ~{minFreqForHom}"
+ if "~{normalPurity}" != "1.0":
+    varscanCommand += " --normal-purity ~{normalPurity}"
+ if "~{tumorPurity}" != "1.0":
+    varscanCommand += " --tumor-purity ~{tumorPurity}"
+ if "~{pValueHet}" != "0.99":
+    varscanCommand += " --p-value ~{pValueHet}"
+ if "~{strandFilter}" != "0":
+    varscanCommand += " --strand-filter 1"
+ if "~{validation}" != "0":
+    varscanCommand += " --validation 1"
+ if "~{outputVcf}" != "0":
+    varscanCommand += " --output-vcf 1"
+    varscanCommand += " --output-snp ~{sampleID}.snp.vcf --output-indel ~{sampleID}.indel.vcf"
+ else:
+    varscanCommand += " --output-snp ~{sampleID}.snp --output-indel ~{sampleID}.indel"
 
-     Optional parameters:
+ cvg = ~{minCoverage}
+ resultsOk = False
+ f = open("~{logFile}", "w+")
+ f.write('[Varscan log]' + '\n')
 
-    --min-coverage-normal MIN_COVERAGE_NORMAL
-    --min-coverage-tumor  MIN_COVERAGE_TUMOR
-    --min-var-freq MIN_VAR_FREQUENCY
-    --min-freq-for-hom MIN_FREQUENCY_FOR_HOM
-    --normal-purity NORMAL_PURITY
-    --tumor-purity TUMOR_PURIY
-    --p-value P_VALUE_HET
-    --strand-filter 1
-    --validation 1
-    --output-vcf 1
-    
-    Settings for output format:
+ while not resultsOk:
+     run_command = varscanCommand
+     run_command += " --min-coverage " + str(cvg)
+     cvg -= 2
+     f.write('[' + run_command + ']\n')
+     res_string = os.popen(run_command + " 2>&1").read()
+     f.write(res_string)
+     m = re.search(r'(\d+)', str(res_string))
+     m = re.search(r'(\d+) had sufficient coverage', res_string)
+     if not m or (m and m.group(1) == '0' and cvg <= 2):
+         f.write('Unable to run Varscan even with min-coverage set to ' + str(cvg) + ' aborting...\n')
+         break
+     elif m and m.group(1) != '0':
+         resultsOk = True
+         f.write('Success!\n')
+     else:
+         f.write('Coverage threshold too high, trying min-coverage ' + str(cvg) + '...\n')
 
-    --output-snp SAMPLE_ID.snp.vcf --output-indel SAMPLE_ID.indel.vcf
-  
-    or:
-
-    --output-snp SAMPLE_ID.snp --output-indel SAMPLE_ID.indel
-
+ if not resultsOk:
+     f.write('Varscan failed\n')
+ f.close()
+ CODE
 ```
-
-  * Merge the SNVs and Indels into a single file
-    The vcfCombine tasks combines the data and indexes the bgzipped output
-
 ```
-set -eo pipefail
+ unset _JAVA_OPTIONS
+ set -euxo pipefail
+ python<<CODE
+ import os
+ import re
+ varscan = os.path.expandvars("~{varScan}")
+ varscanCommand = "zcat ~{inputPileup} | java -Xmx~{javaMemory}G -jar " + varscan + " copynumber --output-file ~{sampleID} -mpileup 1 --p-value ~{pValue}"
+ cvg = 0
+ resultsOk = False
+ f = open("~{logFile}", "w+")
+ f.write('[Varscan log]' + '\n')
 
-# bgzip and index the vcf files
-bgzip -c ~{vcfSnvs} > ~{outputFileNamePrefix}.varscan2_snv.vcf
-tabix ~{outputFileNamePrefix}.varscan2_snv.vcf.gz
-bgzip -c ~{vcfSnvs} > ~{outputFileNamePrefix}.varscan2_indel.vcf
-tabix ~{outputFileNamePrefix}.varscan2_snv.vcf.gz
+ while not resultsOk:
+     run_command = varscanCommand
+     if cvg == 0:
+         cvg = 19
+     cvg -= 4
+     run_command += " --min-coverage " + str(cvg)
+     f.write('[' + run_command + ']\n')
+     res_string = os.popen(run_command + " 2>&1").read()
+     m = re.search(r'(\d+)', str(res_string))
+     m = re.search(r'(\d+) had sufficient coverage', res_string)
+     if not m or (m and m.group(1) == '0' and cvg <= 2):
+         f.write('Unable to run Varscan even with min-coverage set to ' + str(cvg) + ' aborting...\n')
+         break
+     elif m and m.group(1) != '0':
+         resultsOk = True
+         f.write('Success!\n')
+     else:
+         f.write('Coverage threshold too high, trying min-coverage ' + str(cvg) + '...\n')
 
-# concat into a single output, bgzip and index
-bcftools concat -a -o ~{outputFileNamePrefix}.varscan2_all.vcf ~{outputFileNamePrefix}.varscan2_snv.vcf.gz ~{outputFileNamePrefix}.varscan2_indel.vcf.gz
-bgzip ~{outputFileNamePrefix}.varscan2_all.vcf
-tabix ~{outputFileNamePrefix}.varscan2_all.vcf.gz
+ if not resultsOk:
+     f.write('Varscan failed\n')
+ f.close()
+ CODE
 ```
-
-
-
- * Find minimum coverage threshold for CV analysis:
-
 ```
+ python<<CODE
+ import os
+ varscan = os.path.expandvars("~{varScan}")
+ filterCommand = "java -Xmx~{javaMemory}G -jar " + varscan + " copyCaller ~{copyNumberFile} --output-file ~{sampleID}.copynumber.filtered"
 
-A python code configures and runs this command: 
+ if "~{min_coverage}" != "20":
+    filterCommand += " --min-coverage ~{min_coverage}"
+ if "~{min_tumor_coverage}" != "10":
+    filterCommand += " --min-tumor-coverage ~{min_tumor_coverage}"
+ if "~{max_homdel_coverage}" != "5":
+    filterCommand += "--max-homdel-coverage ~{max_homdel_coverage}"
+ if "~{del_threshold}" != "0.25":
+    filterCommand += " --del-threshold ~{del_threshold}"
+ if "~{amp_threshold}" != "0.25":
+    filterCommand += " --amp-threshold ~{amp_threshold}"
+ if "~{min_region_size}" != "10":
+    filterCommand += " --min-region-size ~{min_region_size}"
+ if "~{recenter_up}" != "0":
+    filterCommand += " --recenter-up ~{recenter_up}"
+ if "~{recenter_down}" != "0":
+    filterCommand += " --recenter-down ~{recenter_down}"
 
-zcat ~{inputPileup} | java -Xmx~{javaMemory}G -jar " + varscan + " copynumber --output-file ~{sampleID} -mpileup 1 --p-value ~{pValue}"
-
-Varscan reports if the coverage threshold was sufficient for the analysis. We use this coverage setting in the next step
-
+ message = os.popen(filterCommand + " 2>&1").read()
+ CODE
 ```
-
-### Run copy number change analysis:
-
-```
-
-A python code configures and runs this command:
- 
-java -Xmx[MEMORY]G -jar varscan copyCaller CV_FILE 
-                   --output-file SAMPLE_ID.copynumber.filtered
-                   --min-coverage MIN_COVERAGE # Value found in the previous step
-
-                    Optional parameters:
-
-                   --min-tumor-coverage  MIN_TUMOR_COVERAGE
-                   --max-homdel-coverage MAX_HOMDEL_COVERAGE
-                   --del-threshold   DEL_THRESHOLD
-                   --amp-threshold   AMP_THRESHOLD
-                   --min-region-size MIN_REGION_SIZE
-                   --recenter-up     RECENTER_UP
-                   --recenter-down   RECENTER_DOWN
-
-```
-
