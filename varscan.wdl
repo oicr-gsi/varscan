@@ -29,14 +29,14 @@ Map[String, Array[String]] regions = {
 
 Map[String,GenomeResources] resources = {
   "hg19":  {
-    "workflowModules": "samtools/1.16.1 hg19/p13",
+    "workflowModules": "samtools/0.1.19 hg19/p13",
     "refFasta": "$HG19_ROOT/hg19_random.fa",
     "mergingModules": "picard/2.21.2 hg19/p13",
     "refDict": "$HG19_ROOT/hg19_random.dict",
     "largest": "249250621"
   },
   "hg38": {
-    "workflowModules": "samtools/1.16.1 hg38/p12",
+    "workflowModules": "samtools/0.1.19 hg38/p12",
     "refFasta": "$HG38_ROOT/hg38_random.fa",
     "mergingModules": "picard/2.21.2 hg38/p12",
     "refDict": "$HG38_ROOT/hg38_random.dict",
@@ -50,7 +50,7 @@ Map[String,GenomeResources] resources = {
     "largest": "248956422"
   },
   "mm10": {
-    "workflowModules": "samtools/1.16.1 mm10/p6",
+    "workflowModules": "samtools/0.1.19 mm10/p6",
     "refFasta": "$MM10_ROOT/mm10.fa",
     "mergingModules": "picard/2.21.2 mm10/p6",
     "refDict": "$MM10_ROOT/mm10.dict",
@@ -82,7 +82,7 @@ scatter ( r in splitRegions )   {
                             scaleCoefficient = getChrCoefficient.coeff,
                             region = r }
 
-  # Configure and run Varscan
+  # Configure and run Varscan (SNV/indel only)
   call runVarscanSNV as getSnvNative { input: inputPileup = makePileups.pileup, sampleID = sampleID, scaleCoefficient = getChrCoefficient.coeff }
   call runVarscanSNV as getSnvVcf { input: inputPileup = makePileups.pileup, sampleID = sampleID, outputVcf = 1, scaleCoefficient = getChrCoefficient.coeff }
 }
@@ -110,7 +110,7 @@ call vcfCombine {   input: vcfSnvs = mergeSNPvcf.mergedVcf,
 meta {
   author: "Peter Ruzanov, Lawrence Heisler, Monica L. Rojas-Pena"
   email: "pruzanov@oicr.on.ca, lheisler@oicr.on.ca, mrojaspena@oicr.on.ca"
-  description: "Varscan 2.3, workflow for calling somatic single nucleotide variations and indels, as well as copy number changes\nCreation of mpileups and calling variants are done with parallel processing. Varscan uses original heuristic/statistical approach which puts it apart of the other similar callers.\n\n![varscan outputs](docs/Screenshot_Varscan.png)"
+  description: "Varscan 2.3, workflow for calling somatic single nucleotide variations and indels\nCreation of mpileups and calling variants are done with parallel processing. Varscan uses original heuristic/statistical approach whish puts it apart of the other similar callers.\n\n![varscan outputs](docs/Screenshot_Varscan.png)"
 
   dependencies: [
       {
@@ -122,12 +122,8 @@ meta {
         url: "http://varscan.sourceforge.net"
       },
       {
-        name: "samtools/1.16.1",
+        name: "samtools/0.1.19",
         url: "http://www.htslib.org/"
-      },
-      {
-        name: "rstats/3.6",
-        url: "http://cran.utstat.utoronto.ca/src/base/R-3/R-3.6.1.tar.gz"
       },
       {
          name: "bcftools/1.9",
@@ -170,7 +166,7 @@ parameter_meta {
   inputNormal: "input .bam file for normal sample"
   inputTumorIndex: "input .bai file for tumor sample"
   inputNormalIndex: "input .bai file for normal sample"
-  reference: "Reference assembly id, hg19 hg38 or mm10"
+  reference: "Reference assembly id: hg19, hg38, hg38_noAlt or mm10"
   outputFileNamePrefix: "Output file(s) prefix"
   bedIntervalsPath: "Path to a .bed file used for splitting pileup job/limiting analysis to selected regions"
   chromRegions: "Regions used for scattering tasks, need to be assembly-specific"
@@ -248,10 +244,6 @@ task vcfCombine {
 		
 
 }
-
-
-
-
 
 # ================================================================
 #  Scaling coefficient - use to scale RAM allocation by chromosome
@@ -354,9 +346,9 @@ input {
  String samtools = "$SAMTOOLS_ROOT/bin/samtools"
  String region 
  Float scaleCoefficient = 1.0
- Int jobMemory   = 8
- Int minMemory = 4
- Int timeout = 40
+ Int jobMemory   = 18
+ Int minMemory = 6
+ Int timeout     = 40
 }
 
 parameter_meta {
@@ -393,7 +385,7 @@ output {
 }
 
 #=============================================================
-# Task for concatenating SNV variants
+# Task for concatenating SNV and indel variants
 #=============================================================
 task mergeVariantsNative {
 input {
@@ -432,9 +424,8 @@ output {
 }
 }
 
-
 #=============================================================
-# Task for concatenating SNV variants
+# Task for concatenating SNV and indel variants
 #=============================================================
 task mergeVariantsVcf {
 input {
@@ -607,4 +598,3 @@ output {
   File? indelVcfFile = "~{sampleID}.indel.vcf"
 }
 }
-

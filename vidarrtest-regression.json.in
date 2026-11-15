@@ -107,8 +107,6 @@
             "varscan.makePileups.samtools": null,
             "varscan.makePileups.timeout": null,
             "varscan.makePileups.scaleCoefficient": null,
-            "varscan.mergeCNV.jobMemory": null,
-            "varscan.mergeCNV.timeout": null,
             "varscan.mergeIND.jobMemory": null,
             "varscan.mergeIND.timeout": null,
             "varscan.mergeINDvcf.javaMemory": null,
@@ -124,27 +122,6 @@
             "varscan.mergeSNPvcf.seqDictionary": null,
             "varscan.mergeSNPvcf.timeout": null,
             "varscan.outputFileNamePrefix": "PCSI_Test_chr22",
-            "varscan.runVarscanCNV.javaMemory": null,
-            "varscan.runVarscanCNV.jobMemory": null,
-            "varscan.runVarscanCNV.minMemory": null,
-            "varscan.runVarscanCNV.logFile": null,
-            "varscan.runVarscanCNV.modules": null,
-            "varscan.runVarscanCNV.pValue": null,
-            "varscan.runVarscanCNV.timeout": null,
-            "varscan.runVarscanCNV.varScan": null,
-            "varscan.runVarscanCNV.scaleCoefficient": null,
-            "varscan.smoothData.amp_threshold": null,
-            "varscan.smoothData.del_threshold": null,
-            "varscan.smoothData.javaMemory": null,
-            "varscan.smoothData.jobMemory": null,
-            "varscan.smoothData.max_homdel_coverage": null,
-            "varscan.smoothData.min_coverage": null,
-            "varscan.smoothData.min_region_size": null,
-            "varscan.smoothData.min_tumor_coverage": null,
-            "varscan.smoothData.modules": null,
-            "varscan.smoothData.recenter_down": null,
-            "varscan.smoothData.recenter_up": null,
-            "varscan.smoothData.varScan": null,
             "varscan.vcfCombine.vcfSnvs": null,
             "varscan.vcfCombine.vcfIndels": null,
             "varscan.vcfCombine.modules": null,
@@ -160,14 +137,6 @@
         },
         "id": "PCSI_chr22",
         "metadata": {
-            "varscan.resultCnvFile": {
-                "contents": [
-                    {
-                        "outputDirectory": "@SCRATCH@/@DATE@_Workflow_varscan_PCSI_chr22_@JENKINSID@"
-                    }
-                ],
-                "type": "ALL"
-            },
             "varscan.resultIndelFile": {
                 "contents": [
                     {
@@ -334,8 +303,6 @@
             "varscan.makePileups.samtools": null,
             "varscan.makePileups.timeout": null,
             "varscan.makePileups.scaleCoefficient": null,
-            "varscan.mergeCNV.jobMemory": null,
-            "varscan.mergeCNV.timeout": null,
             "varscan.mergeIND.jobMemory": null,
             "varscan.mergeIND.timeout": null,
             "varscan.mergeINDvcf.javaMemory": null,
@@ -351,27 +318,6 @@
             "varscan.mergeSNPvcf.seqDictionary": null,
             "varscan.mergeSNPvcf.timeout": null,
             "varscan.outputFileNamePrefix": "PCSI_Test_chr22_intervals",
-            "varscan.runVarscanCNV.javaMemory": null,
-            "varscan.runVarscanCNV.jobMemory": null,
-            "varscan.runVarscanCNV.minMemory": null,
-            "varscan.runVarscanCNV.logFile": null,
-            "varscan.runVarscanCNV.modules": null,
-            "varscan.runVarscanCNV.pValue": null,
-            "varscan.runVarscanCNV.timeout": null,
-            "varscan.runVarscanCNV.varScan": null,
-            "varscan.runVarscanCNV.scaleCoefficient": null,
-            "varscan.smoothData.amp_threshold": null,
-            "varscan.smoothData.del_threshold": null,
-            "varscan.smoothData.javaMemory": null,
-            "varscan.smoothData.jobMemory": null,
-            "varscan.smoothData.max_homdel_coverage": null,
-            "varscan.smoothData.min_coverage": null,
-            "varscan.smoothData.min_region_size": null,
-            "varscan.smoothData.min_tumor_coverage": null,
-            "varscan.smoothData.modules": null,
-            "varscan.smoothData.recenter_down": null,
-            "varscan.smoothData.recenter_up": null,
-            "varscan.smoothData.varScan": null,
             "varscan.vcfCombine.vcfSnvs": null,
             "varscan.vcfCombine.vcfIndels": null,
             "varscan.vcfCombine.modules": null,
@@ -387,14 +333,6 @@
         },
         "id": "PCSI_chr22_intervals",
         "metadata": {
-            "varscan.resultCnvFile": {
-                "contents": [
-                    {
-                        "outputDirectory": "@SCRATCH@/@DATE@_Workflow_varscan_PCSI_chr22_intervals_@JENKINSID@"
-                    }
-                ],
-                "type": "ALL"
-            },
             "varscan.resultIndelFile": {
                 "contents": [
                     {
@@ -568,8 +506,6 @@
             "varscan.makePileups.samtools": null,
             "varscan.makePileups.timeout": null,
             "varscan.makePileups.scaleCoefficient": null,
-            "varscan.mergeCNV.jobMemory": null,
-            "varscan.mergeCNV.timeout": null,
             "varscan.mergeIND.jobMemory": null,
             "varscan.mergeIND.timeout": null,
             "varscan.mergeINDvcf.javaMemory": null,
@@ -585,27 +521,6 @@
             "varscan.mergeSNPvcf.seqDictionary": "$HG38_ROOT/hg38_random.dict",
             "varscan.mergeSNPvcf.timeout": null,
             "varscan.outputFileNamePrefix": "MATS_Test",
-            "varscan.runVarscanCNV.javaMemory": null,
-            "varscan.runVarscanCNV.jobMemory": null,
-            "varscan.runVarscanCNV.minMemory": null,
-            "varscan.runVarscanCNV.logFile": null,
-            "varscan.runVarscanCNV.modules": null,
-            "varscan.runVarscanCNV.pValue": null,
-            "varscan.runVarscanCNV.timeout": null,
-            "varscan.runVarscanCNV.varScan": null,
-            "varscan.runVarscanCNV.scaleCoefficient": null,
-            "varscan.smoothData.amp_threshold": null,
-            "varscan.smoothData.del_threshold": null,
-            "varscan.smoothData.javaMemory": null,
-            "varscan.smoothData.jobMemory": null,
-            "varscan.smoothData.max_homdel_coverage": null,
-            "varscan.smoothData.min_coverage": null,
-            "varscan.smoothData.min_region_size": null,
-            "varscan.smoothData.min_tumor_coverage": null,
-            "varscan.smoothData.modules": null,
-            "varscan.smoothData.recenter_down": null,
-            "varscan.smoothData.recenter_up": null,
-            "varscan.smoothData.varScan": null,
             "varscan.vcfCombine.vcfSnvs": null,
             "varscan.vcfCombine.vcfIndels": null,
             "varscan.vcfCombine.modules": null,
@@ -621,14 +536,6 @@
         },
         "id": "MATS_chr22",
         "metadata": {
-            "varscan.resultCnvFile": {
-                "contents": [
-                    {
-                        "outputDirectory": "@SCRATCH@/@DATE@_Workflow_varscan_MATS_chr22_@JENKINSID@"
-                    }
-                ],
-                "type": "ALL"
-            },
             "varscan.resultIndelFile": {
                 "contents": [
                     {

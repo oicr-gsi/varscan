@@ -2,7 +2,7 @@
 
 ## Overview
 
-Varscan 2.3, workflow for calling somatic single nucleotide variations and indels, as well as copy number changes
+Varscan 2.3, workflow for calling somatic single nucleotide variations and indels
 Creation of mpileups and calling variants are done with parallel processing. Varscan uses original heuristic/statistical approach whish puts it apart of the other similar callers.
 
 ![varscan outputs](docs/Screenshot_Varscan.png)
@@ -12,7 +12,6 @@ Creation of mpileups and calling variants are done with parallel processing. Var
 * [picard 2.21.2](https://broadinstitute.github.io/picard)
 * [varscan 2.4.2](http://varscan.sourceforge.net)
 * [samtools 0.1.19](http://www.htslib.org/)
-* [rstats 3.6](http://cran.utstat.utoronto.ca/src/base/R-3/R-3.6.1.tar.gz)
 * [bcftools 1.9](https://github.com/samtools/bcftools)
 
 
@@ -32,7 +31,7 @@ Parameter|Value|Description
 `inputNormal`|File|input .bam file for normal sample
 `inputTumorIndex`|File|input .bai file for tumor sample
 `inputNormalIndex`|File|input .bai file for normal sample
-`reference`|String|Reference assembly id, hg19 hg38 or mm10
+`reference`|String|Reference assembly id: hg19, hg38, hg38_noAlt or mm10
 `outputFileNamePrefix`|String|Output file(s) prefix
 
 
@@ -54,14 +53,6 @@ Parameter|Value|Default|Description
 `makePileups.jobMemory`|Int|18|memory for this job, in Gb
 `makePileups.minMemory`|Int|6|Minimal amount of memory to assign to the task
 `makePileups.timeout`|Int|40|Timeout in hours, needed to override imposed limits
-`runVarscanCNV.pValue`|Float|0.05|p-value for cnv calling, default is 0.05
-`runVarscanCNV.jobMemory`|Int|20|Memory in Gb for this job
-`runVarscanCNV.minMemory`|Int|4|A minimum amount of memory allocated to the task, overrides the scaled RAM setting
-`runVarscanCNV.javaMemory`|Int|6|Memory in Gb for Java
-`runVarscanCNV.logFile`|String|"VARSCAN_CNV.log"|File for logging Varscan messages
-`runVarscanCNV.varScan`|String|"$VARSCAN_ROOT/VarScan.jar"|path to varscan .jar file
-`runVarscanCNV.modules`|String|"varscan/2.4.2 java/8"|Names and versions of modules
-`runVarscanCNV.timeout`|Int|40|Timeout in hours, needed to override imposed limits
 `getSnvNative.pValue`|Float|0.05|somatic p-value for SNV calling, default is 0.05
 `getSnvNative.jobMemory`|Int|20|Memory in Gb for this job
 `getSnvNative.minMemory`|Int|4|A minimum amount of memory allocated to the task, overrides the scaled RAM setting
@@ -99,8 +90,6 @@ Parameter|Value|Default|Description
 `getSnvVcf.varScan`|String|"$VARSCAN_ROOT/VarScan.jar"|path to varscan .jar file
 `getSnvVcf.modules`|String|"varscan/2.4.2 java/8"|Names and versions of modules
 `getSnvVcf.timeout`|Int|40|Timeout in hours, needed to override imposed limits
-`mergeCNV.jobMemory`|Int|6|memory in GB for this job
-`mergeCNV.timeout`|Int|10|Timeout in hours, needed to override imposed limits
 `mergeSNP.jobMemory`|Int|6|memory in GB for this job
 `mergeSNP.timeout`|Int|10|Timeout in hours, needed to override imposed limits
 `mergeIND.jobMemory`|Int|6|memory in GB for this job
@@ -111,18 +100,6 @@ Parameter|Value|Default|Description
 `mergeINDvcf.jobMemory`|Int|12|memory in GB for this job
 `mergeINDvcf.javaMemory`|Int|8|memory in GB for java VM
 `mergeINDvcf.timeout`|Int|10|Timeout in hours, needed to override imposed limits
-`smoothData.varScan`|String|"$VARSCAN_ROOT/VarScan.jar"|Path to VarScan jar file
-`smoothData.modules`|String|"varscan/2.4.2 java/8 rstats/3.6"|Modules for this job
-`smoothData.min_coverage`|Int|20|Fine-tuning parameter for VarScan
-`smoothData.max_homdel_coverage`|Int|5|Max coverage form homozygous deletion, default is 5
-`smoothData.min_tumor_coverage`|Int|10|Min coverage in tumor sample, default is 10
-`smoothData.del_threshold`|Float|0.25|Fine-tuning parameter for VarScan
-`smoothData.amp_threshold`|Float|0.25|Amplification threshold to report, default is 0.25
-`smoothData.min_region_size`|Int|10|Fine-tuning parameter for VarScan
-`smoothData.recenter_up`|Int|0|Fine-tuning parameter for VarScan
-`smoothData.recenter_down`|Int|0|Fine-tuning parameter for VarScan
-`smoothData.jobMemory`|Int|16|Memory in Gb for this job
-`smoothData.javaMemory`|Int|6|Memory in Gb for Java
 `vcfCombine.modules`|String|"bcftools/1.9 tabix/1.9"|environment modules
 `vcfCombine.jobMemory`|Int|16|Memory allocated for job
 `vcfCombine.threads`|Int|4|Number of threads for processing
@@ -133,7 +110,6 @@ Parameter|Value|Default|Description
 
 Output | Type | Description | Labels
 ---|---|---|---
-`resultCnvFile`|File?|file with CNV calls, smoothed|vidarr_label: resultCnvFile
 `resultSnpFile`|File|file with SNPs, native varscan format|vidarr_label: resultSnpFile
 `resultIndelFile`|File|file with Indel calls, native varscan format|vidarr_label: resultIndelFile
 `resultSnpVcfFile`|File|file with SNPs, vcf format|vidarr_label: resultSnpVcfFile
@@ -253,69 +229,6 @@ This section lists command(s) run by varscan workflow
  if not resultsOk:
      f.write('Varscan failed\n')
  f.close()
- CODE
-```
-```
- unset _JAVA_OPTIONS
- set -euxo pipefail
- python<<CODE
- import os
- import re
- varscan = os.path.expandvars("~{varScan}")
- varscanCommand = "zcat ~{inputPileup} | java -Xmx~{javaMemory}G -jar " + varscan + " copynumber --output-file ~{sampleID} -mpileup 1 --p-value ~{pValue}"
- cvg = 0
- resultsOk = False
- f = open("~{logFile}", "w+")
- f.write('[Varscan log]' + '\n')
-
- while not resultsOk:
-     run_command = varscanCommand
-     if cvg == 0:
-         cvg = 19
-     cvg -= 4
-     run_command += " --min-coverage " + str(cvg)
-     f.write('[' + run_command + ']\n')
-     res_string = os.popen(run_command + " 2>&1").read()
-     m = re.search(r'(\d+)', str(res_string))
-     m = re.search(r'(\d+) had sufficient coverage', res_string)
-     if not m or (m and m.group(1) == '0' and cvg <= 2):
-         f.write('Unable to run Varscan even with min-coverage set to ' + str(cvg) + ' aborting...\n')
-         break
-     elif m and m.group(1) != '0':
-         resultsOk = True
-         f.write('Success!\n')
-     else:
-         f.write('Coverage threshold too high, trying min-coverage ' + str(cvg) + '...\n')
-
- if not resultsOk:
-     f.write('Varscan failed\n')
- f.close()
- CODE
-```
-```
- python<<CODE
- import os
- varscan = os.path.expandvars("~{varScan}")
- filterCommand = "java -Xmx~{javaMemory}G -jar " + varscan + " copyCaller ~{copyNumberFile} --output-file ~{sampleID}.copynumber.filtered"
-
- if "~{min_coverage}" != "20":
-    filterCommand += " --min-coverage ~{min_coverage}"
- if "~{min_tumor_coverage}" != "10":
-    filterCommand += " --min-tumor-coverage ~{min_tumor_coverage}"
- if "~{max_homdel_coverage}" != "5":
-    filterCommand += "--max-homdel-coverage ~{max_homdel_coverage}"
- if "~{del_threshold}" != "0.25":
-    filterCommand += " --del-threshold ~{del_threshold}"
- if "~{amp_threshold}" != "0.25":
-    filterCommand += " --amp-threshold ~{amp_threshold}"
- if "~{min_region_size}" != "10":
-    filterCommand += " --min-region-size ~{min_region_size}"
- if "~{recenter_up}" != "0":
-    filterCommand += " --recenter-up ~{recenter_up}"
- if "~{recenter_down}" != "0":
-    filterCommand += " --recenter-down ~{recenter_down}"
-
- message = os.popen(filterCommand + " 2>&1").read()
  CODE
 ```
 
