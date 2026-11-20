@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.0.0] - 2026-11-17
+### Removed
+- [GRD-1036](https://jira.oicr.on.ca/browse/GRD-1036) Removed copy number (CNV) analysis: the `runVarscanCNV`, `mergeCNV` and `smoothData` tasks and the `resultCnvFile` output. The `rstats/3.6` dependency is no longer needed.
+
 ## [2.5.5] - 2026-11-12
 ### Fixed
 - [GP-5987](https://jira.oicr.on.ca/browse/GP-5987) Set `java.io.tmpdir` to `$TMP` in `mergeVariantsVcf` to fix Picard native library loading on SLURM (`/tmp` is `noexec`).
